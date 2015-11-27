@@ -216,7 +216,7 @@ shinyServer(function(input, output,session) {
    fdf<-get(input$file)
    items=names(fdf)
    tagList(
-     selectInput("x", "Column to plot",items,multiple=T)
+     selectInput("x", "Columns to plot",items,multiple=T)    
    )
  })
   
@@ -371,6 +371,18 @@ shinyServer(function(input, output,session) {
       write.table(fdf, file,sep="\t",quote=F,row.names=F)
     }
   )
+
+##Add plot save button on each panel for pdf, different for ggplot and others,
+##May need to convert all plots to ggplot
+#  output$downloadPlot <- downloadHandler(
+#    filename = function() {input$tableName},
+#    content = function(file) {
+#      fdf<-filter(input$filts)
+#      fdf<-fdf[, input$show_vars, drop = FALSE]
+#      write.table(fdf, file,sep="\t",quote=F,row.names=F)
+#    }
+#  )
+
  
 }
 )

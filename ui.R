@@ -28,7 +28,6 @@ shinyUI(fluidPage(
       hr(),
       conditionalPanel(
                 condition="input.conditionedPanels==1",
-                p(strong("Tables")),       
                 wellPanel(p(strong("Controls")),
                           checkboxInput("show", "Show columns", FALSE),
                           checkboxInput('show_all', 'All/None', TRUE),
@@ -42,7 +41,6 @@ shinyUI(fluidPage(
      ),
      conditionalPanel(
                 condition="input.conditionedPanels==2",
-                p(strong("1D Plots")),
                 wellPanel(p(strong("Data")), 
                           uiOutput("plot_cols")
                 ),
@@ -60,7 +58,6 @@ shinyUI(fluidPage(
      ),
     conditionalPanel(
                   condition="input.conditionedPanels==3",
-                  p(strong("2D Plots")),
                   wellPanel(p(strong("Data")), 
                             uiOutput("dplot_cols")
                   ),
@@ -72,35 +69,33 @@ shinyUI(fluidPage(
                   )
        ),
     conditionalPanel(condition="input.conditionedPanels==4",
-                  p(strong("Binned Plots")),
                   wellPanel(p(strong("Data")), 
-                     uiOutput("bin_cols")
+                           uiOutput("bin_cols")
                   ),
-                       wellPanel(p(strong("Controls")),
+                  wellPanel(p(strong("Controls")),
                          numericInput("win","Bin size",200,min=1),
                          numericInput("step","Step size",40,min=1),
                          selectInput("func","Operation",choices=c("mean","median","boxes","sum","max","min")),
                          selectInput("scale","Scale",choices=c("linear","log","bins")),  
                          numericInput("bymin","Minimum y-axis value",0),
                          numericInput("bymax","Maximum y-axis value",100)
-                       )
+                  )
       ),
       conditionalPanel(condition="input.conditionedPanels==5",
-                       p(strong("3D Tiles")),
-                       wellPanel(p(strong("Data")), 
-                          uiOutput("t_cols")
-                       ),
-                       wellPanel(p(strong("Controls")),
+                  wellPanel(p(strong("Data")), 
+                         uiOutput("t_cols")
+                  ),
+                  wellPanel(p(strong("Controls")),
                           numericInput("bins","Bins",1,min=1,max=1000),
-                          numericInput("tmin","Minimum colour scale",-1),
+                          numericInput("tmin","Minimum colour scale",0),
                           numericInput("tmax","Maximum colour scale",1),
                           numericInput("txmin","Minimum x-axis value",0),
                           numericInput("txmax","Maximum x-axis value",100),
                           numericInput("tymin","Minimum y-axis value",0),
                           numericInput("tymax","Maximum y-axis value",100),
-                          selectInput("tscale","Colour scheme",choices=c("zero","rainbow")),
+                          selectInput("tscale","Colour scheme",choices=c("rainbow","zero")),
                           selectInput("tsummary","Operation",choices=c("mean","median","sum","count"))                                   
-                       )
+                )
       ) 
   ),
   mainPanel(
@@ -111,20 +106,25 @@ shinyUI(fluidPage(
       ),
       tabPanel("1D Plots", value=2,
                plotOutput("plot")
+#               downloadButton('downloadData', 'PDF Plot')
       ), 
       tabPanel("2D Plots", value=3,
                plotOutput("dplot")
+#               downloadButton('downloadData', 'PDF Plot')
       ), 
       tabPanel("Binned Plots", value=4,
                plotOutput("bplot")
+#               downloadButton('downloadData', 'PDF Plot')
       ), 
       tabPanel("3D Tiles", value=5,
-               plotOutput("tplot"),
-               plotOutput("tplot2")
+               plotOutput("tplot")
+#               downloadButton('downloadData', 'PDF Plot')
+      ),
+      tabPanel("Help", value=6,
+               includeMarkdown("README.md")
       )
       , id = "conditionedPanels"
     )
-#    )
   )
 )
 )
