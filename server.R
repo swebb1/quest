@@ -21,7 +21,7 @@ shinyServer(function(input, output,session) {
 
   ######plot functions######
   ##binned plot function
-  bplot<-function(t,x,y,w=400,s=80,f="mean",scale="linear"){
+  bplot<-function(t,x,y,w=400,s=80,f="mean",scale="linear",leg="topleft"){
     withProgress(message="Plotting...",value=0,{
     t<-t[order(t[,x]),] #order x-axis
     l<-length(y) #number of lines to plot
@@ -96,9 +96,9 @@ shinyServer(function(input, output,session) {
       axis(1,at=xbins,labels=format(round(xbins, 1), nsmall = 2))
     }
     else{
-      axis(1,at=c(seq(1,length(xbins),(length(xbins)/10)),length(xbins)),labels=format(round(c(xbins[seq(1,length(xbins),(length(xbins)/10),)],xbins[length(xbins)]), 2), nsmall = 2),las=2)
+      axis(1,at=c(seq(1,length(xbins),(length(xbins)/10)),length(xbins)),labels=format(round(c(xbins[seq(1,length(xbins),(length(xbins)/10))],xbins[length(xbins)]), 2), nsmall = 2),las=2)
     }
-    legend(xbins[2],max,legend=y,lty=rep(1,l),lwd=rep(1,l),col=c("forest green",2:l))
+    legend(x=leg,legend=y,lty=rep(1,l),lwd=rep(1,l),col=c("forest green",2:l))
     })
   }
   
@@ -119,11 +119,15 @@ shinyServer(function(input, output,session) {
     ss<-paste(z,".",func,sep="")
     pp<-NULL;
     if(scale=="zero"){
-      pp<-p + geom_tile(aes_string(fill=ss)) + scale_fill_gradient2(space = "Lab",limits=c(min,max),oob = scales::squish,low="red",mid="white",high="dodger blue") + xlim(xrange) + ylim(yrange)
+      pp<-p + geom_tile(aes_string(fill=ss)) + 
+        scale_fill_gradient2(space = "Lab",limits=c(min,max),oob = scales::squish,low="red",mid="white",high="dodger blue") +
+        xlim(xrange) + ylim(yrange) + theme_bw()
     }
     else if(scale=="rainbow"){ 
         hmcol<-matlab.like2(10)
-        pp<-p + geom_tile(aes_string(fill=ss))+ scale_fill_gradientn(space = "Lab",limits = c(min,max),oob = scales::squish,colours=hmcol)+xlim(xrange)+ylim(yrange)
+        pp<-p + geom_tile(aes_string(fill=ss))+ 
+          scale_fill_gradientn(space = "Lab",limits = c(min,max),oob = scales::squish,colours=hmcol)+
+          xlim(xrange)+ylim(yrange) + theme_bw() 
     }
 #    pp<-pp + stat_smooth(se=T, colour="black",size=1)
     return(pp)
@@ -330,7 +334,7 @@ shinyServer(function(input, output,session) {
   output$bplot <- renderPlot({ 
     fdf<-filter(input$filts)
     if(is.numeric(fdf[,input$bx])& input$off){
-      bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale)
+      bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale,leg=input$leg)
       #bplot(fdf,input$x2,input$y2,w=input$win,s=input$step,f=input$func,scale=input$scale)
     }  
   },height=600,width=800)

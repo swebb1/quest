@@ -76,7 +76,8 @@ shinyUI(fluidPage(
                          numericInput("win","Bin size",200,min=1),
                          numericInput("step","Step size",40,min=1),
                          selectInput("func","Operation",choices=c("mean","median","boxes","sum","max","min")),
-                         selectInput("scale","Scale",choices=c("linear","log","bins")),  
+                         selectInput("scale","Scale",choices=c("linear","log","bins")), 
+                         selectInput("leg","Legend Position",choices=c("topleft","topright","bottomleft","bottomright")),
                          numericInput("bymin","Minimum y-axis value",0),
                          numericInput("bymax","Maximum y-axis value",100)
                   )
