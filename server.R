@@ -117,7 +117,7 @@ shinyServer(function(input, output,session) {
    par(mar=c(10,5,5,5))
    withProgress(message="Plotting...",value=0,{
    fdf<-filter(input$filts)
-   if(is.numeric(fdf[,input$x[1]]) & input$off){ ##Only plot if numeric column selected
+   if(input$auto){ ##Only plot if plotting turned on
      if(input$type=="boxplot"){
        ##plot rival boxplots based on a filter
        if(input$bversus!=""){
@@ -166,7 +166,7 @@ shinyServer(function(input, output,session) {
    output$dplot <- renderPlot({ 
      withProgress(message="Plotting...",value=0,{
      fdf<-filter(input$filts)
-     if(is.numeric(fdf[,input$dx]) & is.numeric(fdf[,input$dy]) & input$off){
+     if(input$auto){
        par(pch=".")
        x<-fdf[,input$dx]
        y<-fdf[,input$dy]
@@ -222,15 +222,13 @@ shinyServer(function(input, output,session) {
   ##bin plot
   output$bplot <- renderPlot({ 
     fdf<-filter(input$filts)
-    if(is.numeric(fdf[,input$bx])& input$off){
+    if(input$auto){
       bmin<-"default"
       bmax<-"default"
       if(input$bmin!="default"){bmin<-as.numeric(input$bmin)}
       if(input$bmax!="default"){bmax<-as.numeric(input$bmax)}
       bplot(t=fdf,x=input$bx,y=input$by,ys=input$bys,ystep=input$bystep,ylab=input$bylab,axis3=input$baxis3,w=input$bw,s=input$bs
               ,f=input$bf,scale=input$bscale,leg=input$bleg,col=cols,max=bmax,min=bmin,feature=input$bfeature)
-      #bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale,leg=input$leg,col=cols)
-      #bplot(fdf,input$x2,input$y2,w=input$win,s=input$step,f=input$func,scale=input$scale)
     }  
   })
   
@@ -256,8 +254,11 @@ shinyServer(function(input, output,session) {
   ##tile plots
   output$tplot <- renderPlot({ 
     fdf<-filter(input$filts)
-    if(is.numeric(fdf[,input$tx]) & is.numeric(fdf[,input$ty]) & is.numeric(fdf[,input$tz]) & input$off){
-      tiler(fdf,input$tx,input$tlogx,input$txs,input$ty,input$tlogy,input$tys,input$tz,input$tlogz,input$tzs,bin=input$bins,min=input$tmin,max=input$tmax,xrange=c(input$txmin,input$txmax),yrange=c(input$tymin,input$tymax),scale=input$tscale,func=input$tsummary)  
+    if(input$auto){
+      tiler(t=fdf,x=input$tx,xl=input$tlogx,xs=input$txs,y=input$ty,yl=input$tlogy,ys=input$tys,
+            z=input$tz,zl=input$tlogz,zs=input$tzs,bin=input$bins,min=input$tmin,max=input$tmax,
+            xrange=c(input$txmin,input$txmax),yrange=c(input$tymin,input$tymax),
+            func=input$tsummary)  
     }  
   })
   

@@ -18,7 +18,7 @@ shinyUI(dashboardPage(
         selectInput("addFilt","Filters",choices=c("No Filter","Apply Filters")),
         textInput("filts","Type filter expression:",value = ""),
         #textInput("add","Add a column to table:",value = ""), ##feature to add currently issue with filter update
-        checkboxInput("off","Auto-plot",value = T)
+        checkboxInput("auto","Auto-plot",value = T)
       )
   ),
   dashboardBody(
@@ -122,15 +122,15 @@ shinyUI(dashboardPage(
      tabItem(tabName="3d",
              fluidRow(
                box(
-                   title="3D plots",width = 8,status="primary",solidHeader=TRUE,
+                   title="3D tile plot",width = 8,status="primary",solidHeader=TRUE,
                    plotOutput("tplot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
+                 title="Controls",width = 4,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("t_cols")
                  ),
-                 wellPanel(p(strong("Controls")),
+                 wellPanel(p(strong("Controls")),style = 'overflow-y: scroll; max-height: 400px',
                            numericInput("bins","Bins",1,min=1,max=1000),
                            numericInput("tmin","Minimum colour scale",0),
                            numericInput("tmax","Maximum colour scale",1),
@@ -138,7 +138,6 @@ shinyUI(dashboardPage(
                            numericInput("txmax","Maximum x-axis value",100),
                            numericInput("tymin","Minimum y-axis value",0),
                            numericInput("tymax","Maximum y-axis value",100),
-                           selectInput("tscale","Colour scheme",choices=c("rainbow","zero")),
                            selectInput("tsummary","Operation",choices=c("mean","median","sum","count"))                                   
                  )
                )
