@@ -106,7 +106,7 @@ shinyServer(function(input, output,session) {
    if(is.null(input$file)){return(NULL)}
 #   fdf<-filter(input$filts)
    fdf<-get(input$file)
-   items=names(fdf)
+   items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
    tagList(
      selectInput("x", "Columns to plot",items,multiple=T)    
    )
@@ -155,7 +155,7 @@ shinyServer(function(input, output,session) {
    if(is.null(input$file)){return(NULL)}
    #   fdf<-filter(input$filts)
    fdf<-get(input$file)
-   items=names(fdf)
+   items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
    tagList(
      selectInput("dx", "Column to plot",items),
      selectInput("dy", "Column to plot",items)
@@ -211,7 +211,7 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file)){return(NULL)}
     #   fdf<-filter(input$filts)
     fdf<-get(input$file)
-    items=names(fdf)
+    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
     tagList(
       selectInput("bx", "Column to bin X-axis by",items), 
       selectInput("by", "Columns to plot",items,multiple=T),
@@ -239,7 +239,7 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file)){return(NULL)}
     #   fdf<-filter(input$filts)
     fdf<-get(input$file)
-    items=names(fdf)
+    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
     tagList(
       selectInput("tx", "X-axis",items), 
       numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
