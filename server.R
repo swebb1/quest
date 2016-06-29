@@ -1,9 +1,8 @@
 library(shiny)
-library(zoo)
 library(ggplot2)
-library(bigvis)
+library(reshape2)
 library(corrplot)
-library(colorRamps)
+library(questplots)
 
 #set up the directory to extract datafiles  from
 path <- "/homes/swebb/data/tables"
@@ -19,122 +18,6 @@ for (i in 1:length(myfiles)) assign(myfiles[i], read.table(temp[i],header=T))
 
 shinyServer(function(input, output,session) {
 
-  ######plot functions######
-  ##binned plot function
-  bplot<-function(t,x,y,w=400,s=80,f="mean",scale="linear",leg="topleft"){
-    withProgress(message="Plotting...",value=0,{
-    t<-t[order(t[,x]),] #order x-axis
-    l<-length(y) #number of lines to plot
-    #remove NAs
-    for(i in 1:l){
-      t<-t[!is.na(t[,y[i]]),]
-    }
-    xb<-t[,x]
-    if(scale=="log"){
-      xb<-log(xb)
-    }
-    xbins<-rollapply(xb, width=w, by=s,FUN="mean", align="left")
-    ybins<-NULL
-    boxlist<-NULL
-    for(i in 1:l){
-      yb<-t[,y[i]]
-      if(f=="boxes"){
-        box<-rollapply(yb, width=w, by=s,FUN=function(b){b}, align="left")
-        bins<-rollapply(yb, width=w, by=s,FUN="median", align="left")
-        box<-t(box)
-        ybins<-cbind(ybins,bins)
-        boxlist[[i]]<-box
-      }
-      else{
-        bins<-rollapply(yb, width=w, by=s,FUN=f, align="left") 
-        ybins<-cbind(ybins,bins)
-      }
-    }
-    min<-min(ybins)
-    max<-max(ybins)
-    if(f=="boxes"){
-      for(i in 1:l){
-        for(j in 1:dim(boxlist[[i]])[2]){
-          min<-min(min,quantile(boxlist[[i]][,j],0.25))
-          max<-max(max,quantile(boxlist[[i]][,j],0.75))    
-        }
-      }  
-      par(mar=c(5,5,5,5))
-      sc<-xbins
-      if(scale=="bins"){
-        sc<-1:length(xbins)
-      }
-      boxplot(boxlist[[1]],outline=F,col="forest green",staplelty=0,whisklty=0,boxcol="forest green",medlty=0,axes=F,xlab=x,
-              ylab="",mar=20,ylim=c(min,max),names="",main=paste(length(xb),"points"),at=sc,boxwex=0.001)
-      lines(sc,ybins[,1],col="dark grey",lwd=2)    
-      #insert color pallete
-      if(l>1){
-        for(i in 2:l){
-          boxplot(boxlist[[i]],add=T,outline=F,col=i,staplelty=0,whisklty=0,boxcol=i,medlty=0,axes=F,xlab="",
-                  ylab="",mar=20,ylim=c(min,max),names="",main="",at=sc,boxwex=0.001)
-          lines(sc,ybins[,i],col="dark grey",lwd=2)
-        }
-      }
-    }
-    else{
-      par(mar=c(5,5,5,5))
-      sc<-xbins
-      if(scale=="bins"){
-        sc<-1:length(xbins)
-      }
-      plot(sc,ybins[,1],col="forest green",axes=F,ylab="",type="l",xlab=x,
-           main=paste(length(xb),"points"),ylim=c(min,max),lwd=2)
-      #insert color pallete
-      if(l>1){
-        for(i in 2:l){
-          lines(sc,ybins[,i],col=i,lwd=2)
-        }
-      }
-    }
-    axis(2)
-    if(scale=="linear" | scale=="log"){
-      axis(1,at=xbins,labels=format(round(xbins, 1), nsmall = 2))
-    }
-    else{
-      axis(1,at=c(seq(1,length(xbins),(length(xbins)/10)),length(xbins)),labels=format(round(c(xbins[seq(1,length(xbins),(length(xbins)/10))],xbins[length(xbins)]), 2), nsmall = 2),las=2)
-    }
-    legend(x=leg,legend=y,lty=rep(1,l),lwd=rep(1,l),col=c("forest green",2:l))
-    })
-  }
-  
-  ##Tile plot function
-  tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=c(-100,100),yrange=c(-100,100),scale="zero",func="median"){
-    if(xl){t[,x]<-log(t[,x])}
-    if(yl){t[,y]<-log(t[,y])}
-    if(zl & func !="count"){t[,z]<-log(t[,z])}
-    tab<-condense(bin(t[,x]*xs,bin),bin(t[,y]*ys,bin),z = t[,z]*zs,summary = func)
-    if(func=="mean"){
-      names(tab)<-c(paste(x,".x",sep=""),paste(y,".y",sep=""),"count",paste(z,".",func,sep=""))
-    }
-    else{
-      names(tab)<-c(paste(x,".x",sep=""),paste(y,".y",sep=""),paste(z,".",func,sep=""))
-    }
-    if(func=="count" & zl){tab[,paste(z,".",func,sep="")]<-log(tab[,paste(z,".",func,sep="")])}
-    p<-ggplot(tab,aes_string(paste(x,".x",sep=""),paste(y,".y",sep="")))
-    ss<-paste(z,".",func,sep="")
-    pp<-NULL;
-    if(scale=="zero"){
-      pp<-p + geom_tile(aes_string(fill=ss)) + 
-        scale_fill_gradient2(space = "Lab",limits=c(min,max),oob = scales::squish,low="red",mid="white",high="dodger blue") +
-        xlim(xrange) + ylim(yrange) + theme_bw()
-    }
-    else if(scale=="rainbow"){ 
-        hmcol<-matlab.like2(10)
-        pp<-p + geom_tile(aes_string(fill=ss))+ 
-          scale_fill_gradientn(space = "Lab",limits = c(min,max),oob = scales::squish,colours=hmcol)+
-          xlim(xrange)+ylim(yrange) + theme_bw() 
-    }
-#    pp<-pp + stat_smooth(se=T, colour="black",size=1)
-    return(pp)
-  }  
-  
-  ######Code######
-  
   ##select file
   output$fileUI <- renderUI({
     tagList(
@@ -181,7 +64,8 @@ shinyServer(function(input, output,session) {
     else{
       return(fdfc)
     }
-  },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 10) )
+  },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 10)
+  )
   
   ##table controls
   output$show_cols<-renderUI({
@@ -260,7 +144,7 @@ shinyServer(function(input, output,session) {
      }
    }
    })
- },height=600,width=800)
+ })
   
  ##2d plot cols
  output$dplot_cols <- renderUI({
@@ -315,7 +199,7 @@ shinyServer(function(input, output,session) {
        }
      }
      })
-   },height=600,width=800)
+   })
   
   
   ##bin plot controls
@@ -337,7 +221,7 @@ shinyServer(function(input, output,session) {
       bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale,leg=input$leg)
       #bplot(fdf,input$x2,input$y2,w=input$win,s=input$step,f=input$func,scale=input$scale)
     }  
-  },height=600,width=800)
+  })
   
   ##tile controls
   output$t_cols <- renderUI({
@@ -364,7 +248,7 @@ shinyServer(function(input, output,session) {
     if(is.numeric(fdf[,input$tx]) & is.numeric(fdf[,input$ty]) & is.numeric(fdf[,input$tz]) & input$off){
       tiler(fdf,input$tx,input$tlogx,input$txs,input$ty,input$tlogy,input$tys,input$tz,input$tlogz,input$tzs,bin=input$bins,min=input$tmin,max=input$tmax,xrange=c(input$txmin,input$txmax),yrange=c(input$tymin,input$tymax),scale=input$tscale,func=input$tsummary)  
     }  
-  },height=600,width=800)
+  })
   
   # Download
   output$downloadData <- downloadHandler(
