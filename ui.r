@@ -29,11 +29,11 @@ shinyUI(dashboardPage(
      tabItem(tabName="data",
              fluidRow(
                box(
-                 title = "Data Table", width = NULL, status = "primary",
+                 title = "Data Table", width = NULL, status = "primary",solidHeader=TRUE,
                  div(style = 'overflow-x: scroll', dataTableOutput('table'))
                ),
                box(
-                title="Controls",width = NULL,status="success",
+                title="Controls",width = NULL,status="success",solidHeader=TRUE,
                 htmlOutput("fileUI"),
                 #fileInput("file", "Input File",multiple = FALSE) ##May add upload file option)
                 checkboxInput("show", "Show columns", FALSE),
@@ -50,11 +50,11 @@ shinyUI(dashboardPage(
      tabItem(tabName="1d",
              fluidRow(
                box(
-                 title="1D plots",width = 8,status="primary",
+                 title="1D plots",width = 8,status="primary",solidHeader=TRUE,
                  plotOutput("plot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",
+                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("plot_cols")
                  ),
@@ -75,11 +75,11 @@ shinyUI(dashboardPage(
      tabItem(tabName="2d",
              fluidRow(
                box(
-                   title="2D plots",width = 8,status="primary",
+                   title="2D plots",width = 8,status="primary",solidHeader=TRUE,
                    plotOutput("dplot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",
+                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("dplot_cols")
                  ),
@@ -95,34 +95,38 @@ shinyUI(dashboardPage(
      tabItem(tabName="bin",
              fluidRow(
                box(
-                 title="Binned plots",width = 8,status="primary",
+                 title="Binned plot",width = 8,status="primary",solidHeader=TRUE,
                  plotOutput("bplot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",
+                 title="Controls",width = 4,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("bin_cols")
                  ),
-                 wellPanel(p(strong("Controls")),
-                           numericInput("win","Bin size",200,min=1),
-                           numericInput("step","Step size",40,min=1),
-                           selectInput("func","Operation",choices=c("mean","median","boxes","sum","max","min")),
-                           selectInput("scale","Scale",choices=c("linear","log","bins")), 
-                           selectInput("leg","Legend Position",choices=c("topleft","topright","bottomleft","bottomright")),
-                           numericInput("bymin","Minimum y-axis value",0),
-                           numericInput("bymax","Maximum y-axis value",100)
+                 wellPanel(p(strong("Controls")),style = 'overflow-y: scroll; max-height: 400px',
+                           numericInput("bw","Bin size",200,min=1),
+                           numericInput("bs","Step size",40,min=1),
+                           numericInput("bys","Rescale y-axis ",1,min=1),
+                           selectInput("bf","Operation",choices=c("mean","median","boxes","sum","max","min")),
+                           selectInput("bscale","Scale",choices=c("linear","log","bins")), 
+                           selectInput("bleg","Legend Position",choices=c("topleft","topright","bottomleft","bottomright")),
+                           textInput("bmin","Minimum y-axis value","default"),
+                           textInput("bmax","Maximum y-axis value","default"),
+                           numericInput("bystep","Y axis step size",0,min=0),
+                           textInput("bylab","Y axis label",""),
+                           textInput("bfeature","Name of features","data points")
                  )
-               )
+                 )
              )
      ),
      tabItem(tabName="3d",
              fluidRow(
                box(
-                   title="3D plots",width = 8,status="primary",
+                   title="3D plots",width = 8,status="primary",solidHeader=TRUE,
                    plotOutput("tplot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",
+                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("t_cols")
                  ),
@@ -143,7 +147,7 @@ shinyUI(dashboardPage(
      tabItem(tabName="help",
              fluidRow(
                box(
-                   title="Help",width = NULL,status="primary",
+                   title="Help",width = NULL,status="primary",solidHeader=TRUE,
                    includeMarkdown("README.md")
                )
              )

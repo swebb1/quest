@@ -3,6 +3,10 @@ library(ggplot2)
 library(reshape2)
 library(corrplot)
 library(questplots)
+library(RColorBrewer)
+
+#setup a color pallete choice on main dashboard or per tool?
+cols<-brewer.pal(9,"Set1")
 
 #set up the directory to extract datafiles  from
 path <- "/homes/swebb/data/tables"
@@ -210,7 +214,8 @@ shinyServer(function(input, output,session) {
     items=names(fdf)
     tagList(
       selectInput("bx", "Column to bin X-axis by",items), 
-      selectInput("by", "Columns to plot",items,multiple=T)
+      selectInput("by", "Columns to plot",items,multiple=T),
+      selectInput("baxis3", "Column to plot on separate axis (e.g. length of regions)",c("NA",items))
     )
   })
   
@@ -218,7 +223,13 @@ shinyServer(function(input, output,session) {
   output$bplot <- renderPlot({ 
     fdf<-filter(input$filts)
     if(is.numeric(fdf[,input$bx])& input$off){
-      bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale,leg=input$leg)
+      bmin<-"default"
+      bmax<-"default"
+      if(input$bmin!="default"){bmin<-as.numeric(input$bmin)}
+      if(input$bmax!="default"){bmax<-as.numeric(input$bmax)}
+      bplot(t=fdf,x=input$bx,y=input$by,ys=input$bys,ystep=input$bystep,ylab=input$bylab,axis3=input$baxis3,w=input$bw,s=input$bs
+              ,f=input$bf,scale=input$bscale,leg=input$bleg,col=cols,max=bmax,min=bmin,feature=input$bfeature)
+      #bplot(fdf,input$bx,input$by,w=input$win,s=input$step,f=input$func,scale=input$scale,leg=input$leg,col=cols)
       #bplot(fdf,input$x2,input$y2,w=input$win,s=input$step,f=input$func,scale=input$scale)
     }  
   })
