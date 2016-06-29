@@ -9,26 +9,35 @@ library(RColorBrewer)
 cols<-brewer.pal(9,"Set1")
 
 #set up the directory to extract datafiles  from
-path <- "/homes/swebb/data/tables"
+#path <- "/homes/swebb/data/tables"
 #read files in directory 
-myfiles <- list.files(path=path)
+#myfiles <- list.files(path=path)
 #myfiles <- grep ##Work out how to only select certain files
 #reconstruct full path name for each file 
-temp = paste(path,myfiles, sep='/')
-##read the contents of each file, and assign too a data.frame with the same name as the filename
-for (i in 1:length(myfiles)) assign(myfiles[i], read.table(temp[i],header=T))
+#temp = paste(path,myfiles, sep='/')
+##read the contents of each file, and assign to a data.frame with the same name as the filename
+#for (i in 1:length(myfiles)) assign(myfiles[i], read.table(temp[i],header=T))
 
 #df<-read.table("/homes/swebb/data/published//PNAS_2015_Zhogbi_GSE66870//deseq/Zhogbi_master_table_deseq_results.tab",header=T)
 
 shinyServer(function(input, output,session) {
 
   ##select file
-  output$fileUI <- renderUI({
-    tagList(
-      selectInput("file",  "Select File:", myfiles )
-    )
+  #output$fileUI <- renderUI({
+  #  tagList(
+  #    selectInput("file",  "Select File:", myfiles )
+  #  )
+  #})
+  
+  Data<-reactive({
+    inFile<-input$file
+    if(is.null(inFile)){
+      return(NULL)
+    }
+    df.raw<-read.table(inFile$datapath,header=T)
+    return(df.raw)
   })
-    
+   
   ##table data
   filter<-function(fstring,ignore=FALSE){
 #    if(input$add != ""){ ##add columns if adds exist
@@ -44,7 +53,8 @@ shinyServer(function(input, output,session) {
 #        eval(parse(text=a4))
 #      }
 #    }
-    fdf<-get(input$file) ##get the object input file
+    #fdf<-get(input$file) ##get the object input file
+    fdf<-Data()
     withProgress(message="Filtering...",value=0,{
     if(input$addFilt=="Apply Filters" | ignore){ ##filter table if filters exist
         f<-strsplit(fstring,",")
@@ -60,6 +70,9 @@ shinyServer(function(input, output,session) {
   
   ##output table
   output$table = renderDataTable({
+    if(is.null(input$file)){
+      return(NULL)
+    }
     fdf<-filter(input$filts)
     fdfc<-fdf[, input$show_vars, drop = FALSE]  ##show selected columns
     if(dim(fdfc)[2]==0){ ##If no columns selected show full table. Needs Fixing!!!!
@@ -75,7 +88,8 @@ shinyServer(function(input, output,session) {
   output$show_cols<-renderUI({
     if(is.null(input$file)){return(NULL)}
     #   fdf<-filter(input$filts)
-    fdf<-get(input$file)
+    #fdf<-get(input$file)
+    fdf<-Data()
     items=names(fdf)
     tagList(
       checkboxGroupInput('show_vars', 'Columns to show:', items, selected = items)
@@ -86,7 +100,8 @@ shinyServer(function(input, output,session) {
   ##Observe check box input for select/deselect all columns
   observe({
     if(is.null(input$file)){return(NULL)}
-    fdf<-get(input$file)
+    fdf<-Data()
+    #fdf<-get(input$file)
     if (input$show_all){
         updateCheckboxGroupInput(
           session, 'show_vars','Columns to show:', choices = names(fdf),
@@ -105,10 +120,11 @@ shinyServer(function(input, output,session) {
  output$plot_cols <- renderUI({
    if(is.null(input$file)){return(NULL)}
 #   fdf<-filter(input$filts)
-   fdf<-get(input$file)
+   #fdf<-get(input$file)
+   fdf<-Data()
    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
    tagList(
-     selectInput("x", "Columns to plot",items,multiple=T)    
+     selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
    )
  })
   
@@ -135,15 +151,15 @@ shinyServer(function(input, output,session) {
        }
     }
      else if(input$type=="histogram"){
-       hx<-fdf[,input$x]
+       hx<-fdf[,input$x[1]]
        if(input$hlogx){
          hx<-log(hx) ##log x axis
        }
        if(input$breaks==0){
-         hist(hx,xlab = input$x,col="firebrick",main="") ##default breaks
+         hist(hx,xlab = input$x[1],col="firebrick",main="") ##default breaks
        }
        else{
-         hist(hx,xlab = input$x,breaks=input$breaks,col="firebrick",main="") ##custom breaks
+         hist(hx,xlab = input$x[1],breaks=input$breaks,col="firebrick",main="") ##custom breaks
        }
      }
    }
@@ -154,7 +170,8 @@ shinyServer(function(input, output,session) {
  output$dplot_cols <- renderUI({
    if(is.null(input$file)){return(NULL)}
    #   fdf<-filter(input$filts)
-   fdf<-get(input$file)
+   #fdf<-get(input$file)
+   fdf<-Data()
    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
    tagList(
      selectInput("dx", "Column to plot",items),
@@ -210,11 +227,12 @@ shinyServer(function(input, output,session) {
   output$bin_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
     #   fdf<-filter(input$filts)
-    fdf<-get(input$file)
+    #fdf<-get(input$file)
+    fdf<-Data()
     items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
     tagList(
       selectInput("bx", "Column to bin X-axis by",items), 
-      selectInput("by", "Columns to plot",items,multiple=T),
+      selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
       selectInput("baxis3", "Column to plot on separate axis (e.g. length of regions)",c("NA",items))
     )
   })
@@ -236,7 +254,8 @@ shinyServer(function(input, output,session) {
   output$t_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
     #   fdf<-filter(input$filts)
-    fdf<-get(input$file)
+    #fdf<-get(input$file)
+    fdf<-Data()
     items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
     tagList(
       selectInput("tx", "X-axis",items), 

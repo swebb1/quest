@@ -34,8 +34,8 @@ shinyUI(dashboardPage(
                ),
                box(
                 title="Controls",width = NULL,status="success",solidHeader=TRUE,
-                htmlOutput("fileUI"),
-                #fileInput("file", "Input File",multiple = FALSE) ##May add upload file option)
+                #htmlOutput("fileUI"),
+                fileInput("file", "Input File",multiple = FALSE), ##May add upload file option)
                 checkboxInput("show", "Show columns", FALSE),
                 checkboxInput('show_all', 'All/None', TRUE),
                 conditionalPanel(
@@ -54,7 +54,7 @@ shinyUI(dashboardPage(
                  plotOutput("plot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
+                 title="Controls",width = 4,collapsible = T,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("plot_cols")
                  ),
@@ -79,7 +79,7 @@ shinyUI(dashboardPage(
                    plotOutput("dplot")
                ),
                box(
-                 width = 4,collapsible = T,status="success",solidHeader=TRUE,
+                 title="Controls",width = 4,collapsible = T,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Data")), 
                            uiOutput("dplot_cols")
                  ),
@@ -126,10 +126,15 @@ shinyUI(dashboardPage(
                    plotOutput("tplot")
                ),
                box(
-                 title="Controls",width = 4,status="success",solidHeader=TRUE,
-                 wellPanel(p(strong("Data")), 
-                           uiOutput("t_cols")
-                 ),
+                 title="Data",width = 4,status="success",solidHeader=TRUE,
+                 wellPanel(p(strong("Data")),style = 'overflow-y: scroll; max-height: 300px',
+                  uiOutput("t_cols")
+                 )
+               )
+             ),
+             fluidRow(
+               box(
+                 title="Controls",width = 12,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Controls")),style = 'overflow-y: scroll; max-height: 400px',
                            numericInput("bins","Bins",1,min=1,max=1000),
                            numericInput("tmin","Minimum colour scale",0),
