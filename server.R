@@ -5,6 +5,9 @@ library(corrplot)
 library(questplots)
 library(RColorBrewer)
 
+#set maximum file size
+options(shiny.maxRequestSize=30*1024^2) 
+
 #setup a color pallete choice on main dashboard or per tool?
 cols<-brewer.pal(9,"Set1")
 
@@ -81,7 +84,7 @@ shinyServer(function(input, output,session) {
     else{
       return(fdfc)
     }
-  },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 10)
+  },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 5)
   )
   
   ##table controls
