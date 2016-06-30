@@ -6,11 +6,12 @@ library(questplots)
 library(RColorBrewer)
 
 #set maximum file size
-options(shiny.maxRequestSize=30*1024^2) 
+options(shiny.maxRequestSize=100*1024^2) #100Mb
 
 #setup a color pallete choice on main dashboard or per tool?
 cols<-brewer.pal(9,"Set1")
 
+####Deprecated code####
 #set up the directory to extract datafiles  from
 #path <- "/homes/swebb/data/tables"
 #read files in directory 
@@ -20,17 +21,26 @@ cols<-brewer.pal(9,"Set1")
 #temp = paste(path,myfiles, sep='/')
 ##read the contents of each file, and assign to a data.frame with the same name as the filename
 #for (i in 1:length(myfiles)) assign(myfiles[i], read.table(temp[i],header=T))
-
 #df<-read.table("/homes/swebb/data/published//PNAS_2015_Zhogbi_GSE66870//deseq/Zhogbi_master_table_deseq_results.tab",header=T)
+####
 
 shinyServer(function(input, output,session) {
 
-  ##select file
-  #output$fileUI <- renderUI({
-  #  tagList(
-  #    selectInput("file",  "Select File:", myfiles )
-  #  )
-  #})
+  filter<-function(d,fstring){
+    df<-d
+    if(fstring != ""){ ##add columns if adds exist
+      withProgress(message="Applying operation...",value=0,{
+        a<-strsplit(fstring,"@")
+        for(i in 1:length(a[[1]])){
+          eval(parse(text=a[[1]]))
+        }
+      })
+    }
+    if(nrow(df) == 0){
+      return(NULL)
+    }
+    df
+  } 
   
   Data<-reactive({
     inFile<-input$file
@@ -38,45 +48,26 @@ shinyServer(function(input, output,session) {
       return(NULL)
     }
     df.raw<-read.table(inFile$datapath,header=T)
-    return(df.raw)
+    df <- NULL
+    try(df<-filter(df.raw,input$add), silent = TRUE)
+    return(df)
   })
-   
-  ##table data
-  filter<-function(fstring,ignore=FALSE){
-#    if(input$add != ""){ ##add columns if adds exist
-#      a<-strsplit(input$add,",")
-#      for(i in 1:length(a[[1]])){
-#        a2<-strsplit(a[[1]][i],":")
-#        a3<-paste(a2[[1]][1],"<-",input$file,"[,'",a2[[1]][2],"']",a2[[1]][3],sep="")
-#        if(length(a2[[1]])==4){
-#          a3<-paste(a3,input$file,"[,'",a2[[1]][4],"']",sep="")
-#        }
-#        eval(parse(text=a3))
-#        a4<-paste(input$file,"<-cbind(",input$file,",",a2[[1]][1],")",sep="")
-#        eval(parse(text=a4))
-#      }
-#    }
-    #fdf<-get(input$file) ##get the object input file
-    fdf<-Data()
-    withProgress(message="Filtering...",value=0,{
-    if(input$addFilt=="Apply Filters" | ignore){ ##filter table if filters exist
-        f<-strsplit(fstring,",")
-        for(i in 1:length(f[[1]])){
-          f2<-strsplit(f[[1]][i],":")
-          f3<-paste("fdf<-subset(fdf,fdf[,'",f2[[1]][1],"']",f2[[1]][2],")",sep="")
-          eval(parse(text=f3))
-        }
+  
+  observe({
+    if(is.null(input$file)){return(NULL)}
+    if (input$freeze){
+      fdf<-Data()
+      frozen_items<-names(fdf[,sapply(fdf,is.numeric),drop=F])
     }
-    })
-    fdf
-  }
+  })
   
   ##output table
   output$table = renderDataTable({
     if(is.null(input$file)){
       return(NULL)
     }
-    fdf<-filter(input$filts)
+    fdf<-Data()
+    #fdf<-filter(input$filts)
     fdfc<-fdf[, input$show_vars, drop = FALSE]  ##show selected columns
     if(dim(fdfc)[2]==0){ ##If no columns selected show full table. Needs Fixing!!!!
       return(fdf)
@@ -90,8 +81,7 @@ shinyServer(function(input, output,session) {
   ##table controls
   output$show_cols<-renderUI({
     if(is.null(input$file)){return(NULL)}
-    #   fdf<-filter(input$filts)
-    #fdf<-get(input$file)
+    fdf<-filter(input$add)
     fdf<-Data()
     items=names(fdf)
     tagList(
@@ -104,7 +94,6 @@ shinyServer(function(input, output,session) {
   observe({
     if(is.null(input$file)){return(NULL)}
     fdf<-Data()
-    #fdf<-get(input$file)
     if (input$show_all){
         updateCheckboxGroupInput(
           session, 'show_vars','Columns to show:', choices = names(fdf),
@@ -122,26 +111,28 @@ shinyServer(function(input, output,session) {
  ##1d plot controls
  output$plot_cols <- renderUI({
    if(is.null(input$file)){return(NULL)}
-#   fdf<-filter(input$filts)
-   #fdf<-get(input$file)
-   fdf<-Data()
-   items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
+   #fdf<-filter(input$filts)
+   if(!input$freeze){
+    fdf<-Data()
+    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
    tagList(
      selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
    )
+   }
  })
   
  ##1d plot
  output$plot <- renderPlot({ 
    par(mar=c(10,5,5,5))
    withProgress(message="Plotting...",value=0,{
-   fdf<-filter(input$filts)
+   fdf<-Data()
+   #fdf<-filter(input$filts)
    if(input$auto){ ##Only plot if plotting turned on
      if(input$type=="boxplot"){
        ##plot rival boxplots based on a filter
        if(input$bversus!=""){
          bfilts<-input$bversus
-         bfdf<-filter(bfilts,TRUE)
+         bfdf<-filter(fdf,bfilts)
          bfdf<-cbind("filter2",bfdf)
          colnames(bfdf)[1]<-"filter"
          fdf<-cbind("filter1",fdf)
@@ -172,10 +163,9 @@ shinyServer(function(input, output,session) {
  ##2d plot cols
  output$dplot_cols <- renderUI({
    if(is.null(input$file)){return(NULL)}
-   #   fdf<-filter(input$filts)
-   #fdf<-get(input$file)
+   #fdf<-filter(input$filts)
    fdf<-Data()
-   items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
+   items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
    tagList(
      selectInput("dx", "Column to plot",items),
      selectInput("dy", "Column to plot",items)
@@ -185,7 +175,8 @@ shinyServer(function(input, output,session) {
    ##2d plot
    output$dplot <- renderPlot({ 
      withProgress(message="Plotting...",value=0,{
-     fdf<-filter(input$filts)
+     fdf<-Data()
+     #fdf<-filter(input$filts)
      if(input$auto){
        par(pch=".")
        x<-fdf[,input$dx]
@@ -210,7 +201,7 @@ shinyServer(function(input, output,session) {
          #if(input$filts!="" & input$addFilt=="Apply Filters"){ ##don't combine with main filter for now
            #hfilts<-paste(input$filts,input$hilite,sep=",")
          #}
-         hfdf<-filter(hfilts,TRUE)
+         hfdf<-filter(fdf,hfilts)
          hx<-hfdf[,input$dx]
          hy<-hfdf[,input$dy]
          if(input$logx){
@@ -229,10 +220,9 @@ shinyServer(function(input, output,session) {
   ##bin plot controls
   output$bin_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
-    #   fdf<-filter(input$filts)
-    #fdf<-get(input$file)
+    #fdf<-filter(input$filts)
     fdf<-Data()
-    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
+    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
     tagList(
       selectInput("bx", "Column to bin X-axis by",items), 
       selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
@@ -242,7 +232,8 @@ shinyServer(function(input, output,session) {
   
   ##bin plot
   output$bplot <- renderPlot({ 
-    fdf<-filter(input$filts)
+    fdf<-Data()
+    #fdf<-filter(input$filts)
     if(input$auto){
       bmin<-"default"
       bmax<-"default"
@@ -256,10 +247,9 @@ shinyServer(function(input, output,session) {
   ##tile controls
   output$t_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
-    #   fdf<-filter(input$filts)
-    #fdf<-get(input$file)
+    #fdf<-filter(input$filts)
     fdf<-Data()
-    items=names(fdf[,sapply(fdf,is.numeric)]) #get numeric columns only
+    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
     tagList(
       selectInput("tx", "X-axis",items), 
       numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
@@ -275,7 +265,8 @@ shinyServer(function(input, output,session) {
   
   ##tile plots
   output$tplot <- renderPlot({ 
-    fdf<-filter(input$filts)
+    fdf<-Data()
+    #fdf<-filter(input$filts)
     if(input$auto){
       tiler(t=fdf,x=input$tx,xl=input$tlogx,xs=input$txs,y=input$ty,yl=input$tlogy,ys=input$tys,
             z=input$tz,zl=input$tlogz,zs=input$tzs,bin=input$bins,min=input$tmin,max=input$tmax,
@@ -288,7 +279,8 @@ shinyServer(function(input, output,session) {
   output$downloadData <- downloadHandler(
     filename = function() {input$tableName},
     content = function(file) {
-      fdf<-filter(input$filts)
+      fdf<-Data()
+      #fdf<-filter(input$filts)
       fdf<-fdf[, input$show_vars, drop = FALSE]
       write.table(fdf, file,sep="\t",quote=F,row.names=F)
     }

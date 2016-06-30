@@ -7,18 +7,16 @@ shinyUI(dashboardPage(
   dashboardHeader(title = "Quest", titleWidth = 220),
   dashboardSidebar(width=220,
       sidebarMenu(
-        sidebarSearchForm(textId = "searchText", buttonId = "searchButton",
-                          label = "Search..."),
+        #sidebarSearchForm(textId = "searchText", buttonId = "searchButton",label = "Search..."),
         menuItem("Data",tabName="data",icon=shiny::icon("database")),
+        menuItem("Filters",tabName="filters",icon=shiny::icon("filter")),
         menuItem("1D plots",tabName="1d",icon=shiny::icon("line-chart")),
         menuItem("2D plots",tabName="2d",icon=shiny::icon("line-chart")),
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
         menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
-        selectInput("addFilt","Filters",choices=c("No Filter","Apply Filters")),
-        textInput("filts","Type filter expression:",value = ""),
-        #textInput("add","Add a column to table:",value = ""), ##feature to add currently issue with filter update
-        checkboxInput("auto","Auto-plot",value = T)
+        checkboxInput("auto","Auto-plot",value = T),
+        checkboxInput("freeze","Freeze inputs",value = F)
       )
   ),
   dashboardBody(
@@ -31,9 +29,11 @@ shinyUI(dashboardPage(
                box(
                  title = "Data Table", width = NULL, status = "primary",solidHeader=TRUE,
                  div(style = 'overflow-x: scroll', dataTableOutput('table'))
-               ),
+               )
+             ),
+             fluidRow(
                box(
-                title="Controls",width = NULL,status="success",solidHeader=TRUE,
+                title="Controls",width = 6,status="success",solidHeader=TRUE,
                 #htmlOutput("fileUI"),
                 fileInput("file", "Input File",multiple = FALSE), ##May add upload file option)
                 checkboxInput("show", "Show columns", FALSE),
@@ -46,6 +46,22 @@ shinyUI(dashboardPage(
                 downloadButton('downloadData', 'Download Table')
               )
             )
+     ),
+     tabItem(tabName="filters",
+             fluidRow(
+              box(
+                title="Filters",width=NULL,status="primary",solidHeader=TRUE,
+                selectInput("addFilt","Filters",choices=c("No Filter","Apply Filters")),
+                textInput("filts","Type filter expression:",value = ""),
+                helpText("e.g. pvalue:<0.05,log2FC:>0 See help page for more examples")
+              ),
+              box(
+                #title="Add data",width=NULL,status="primary",solidHeader=TRUE,
+                #textInput("addName","Name of column to add to the table:",value = ""),
+                #textInput("add","Create expression:",value = ""),
+                helpText("e.g. percent:fraction:*100 See help page for appropriate syntax")
+              )
+             )
      ),
      tabItem(tabName="1d",
              fluidRow(
@@ -156,7 +172,14 @@ shinyUI(dashboardPage(
                )
              )
      )
-   ) 
+   ), 
+   fluidRow(
+     box(
+       title="Code",width = NULL,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
+       textInput("add","Add R code expressions:",value=""),
+       helpText("See help tab for examples")
+     )
+   )
   )
 )
 )

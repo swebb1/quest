@@ -1,16 +1,26 @@
 Shiny App for exploring data
 =========================================
 
-**Filtering**
-To add filters use the following syntax:
-column_name:condition
+*Code*
 
-Separate filters with a comma 
+Use the Code box within the Data tab to run R functions on your table by referring to the table as "df". Separate multiple expressions with the '@' character. Code expressions will be applied in order.
 
-e.g.
+**Subsetting examples**
 
 ```
-biotype:=="protein_coding"
-mean:>0
-pvalue:<0.05,log2FC:>0
+df<-subset(df,df$biotype=="protein_coding")
+df<-subset(df,df$pvalue<0.05 & df$log2FC>0)
+```
+
+**Adding new data to the table**
+
+```
+df$fraction<-df$percent*100
+df$l2fc<-log2(df$sample1/df$sample2)
+```
+
+**Multiple expressions**
+
+```
+df$l2fc<-log2(df$sample1/df$sample2) @ df<-subset(df,abs(df$l2fc)>=1)
 ```
