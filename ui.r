@@ -8,15 +8,16 @@ shinyUI(dashboardPage(
   dashboardSidebar(width=220,
       sidebarMenu(
         #sidebarSearchForm(textId = "searchText", buttonId = "searchButton",label = "Search..."),
-        menuItem("Data",tabName="data",icon=shiny::icon("database")),
-        menuItem("Filters",tabName="filters",icon=shiny::icon("filter")),
+        menuItem("Files",tabName="files",icon=shiny::icon("upload")),
+        menuItem("Data Table",tabName="data",icon=shiny::icon("database")),
         menuItem("1D plots",tabName="1d",icon=shiny::icon("line-chart")),
         menuItem("2D plots",tabName="2d",icon=shiny::icon("line-chart")),
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
         menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
-        checkboxInput("freeze","Freeze inputs",value = F)
+        checkboxInput("freeze","Freeze inputs",value = F),
+        checkboxInput("execute","Apply R code",value = F)
       )
   ),
   dashboardBody(
@@ -24,43 +25,35 @@ shinyUI(dashboardPage(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
    ),
    tabItems(
+     tabItem(tabName="files",
+               fluidRow(
+                 box(
+                   title="Load from your computer",width = NULL,status="primary",solidHeader=TRUE,
+                   #htmlOutput("fileUI"),
+                   fileInput("file", "Input File",multiple = FALSE), ##May add upload file option)
+                   checkboxInput("show", "Show columns", FALSE),
+                   checkboxInput('show_all', 'All/None', TRUE),
+                   conditionalPanel(
+                     condition = "input.show == true",
+                     uiOutput("show_cols")
+                   )
+                 ),
+                 box(
+                   title="Load from server",width = NULL,status="primary",solidHeader=TRUE
+                 ),
+                 box(
+                   title="Download table",width = NULL,status="primary",solidHeader=TRUE,
+                   textInput("tableName","Table Name:",value = "Table.tab"),
+                   downloadButton('downloadData', 'Download Table')
+                 )
+             )
+     ),
      tabItem(tabName="data",
              fluidRow(
                box(
                  title = "Data Table", width = NULL, status = "primary",solidHeader=TRUE,
                  div(style = 'overflow-x: scroll', dataTableOutput('table'))
                )
-             ),
-             fluidRow(
-               box(
-                title="Controls",width = 6,status="success",solidHeader=TRUE,
-                #htmlOutput("fileUI"),
-                fileInput("file", "Input File",multiple = FALSE), ##May add upload file option)
-                checkboxInput("show", "Show columns", FALSE),
-                checkboxInput('show_all', 'All/None', TRUE),
-                conditionalPanel(
-                  condition = "input.show == true",
-                  uiOutput("show_cols")
-                ),       
-                textInput("tableName","Table Name:",value = "Table.tab"),
-                downloadButton('downloadData', 'Download Table')
-              )
-            )
-     ),
-     tabItem(tabName="filters",
-             fluidRow(
-              box(
-                title="Filters",width=NULL,status="primary",solidHeader=TRUE,
-                selectInput("addFilt","Filters",choices=c("No Filter","Apply Filters")),
-                textInput("filts","Type filter expression:",value = ""),
-                helpText("e.g. pvalue:<0.05,log2FC:>0 See help page for more examples")
-              ),
-              box(
-                #title="Add data",width=NULL,status="primary",solidHeader=TRUE,
-                #textInput("addName","Name of column to add to the table:",value = ""),
-                #textInput("add","Create expression:",value = ""),
-                helpText("e.g. percent:fraction:*100 See help page for appropriate syntax")
-              )
              )
      ),
      tabItem(tabName="1d",
@@ -175,8 +168,8 @@ shinyUI(dashboardPage(
    ), 
    fluidRow(
      box(
-       title="Code",width = NULL,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
-       textInput("add","Add R code expressions:",value=""),
+       title="R Code",width = NULL,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
+       tags$textarea(id="add", rows=6, cols=200, ""),
        helpText("See help tab for examples")
      )
    )

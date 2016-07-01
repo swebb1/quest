@@ -32,7 +32,7 @@ shinyServer(function(input, output,session) {
       withProgress(message="Applying operation...",value=0,{
         a<-strsplit(fstring,"@")
         for(i in 1:length(a[[1]])){
-          eval(parse(text=a[[1]]))
+          eval(parse(text=a[[1]][i]))
         }
       })
     }
@@ -47,17 +47,16 @@ shinyServer(function(input, output,session) {
     if(is.null(inFile)){
       return(NULL)
     }
-    df.raw<-read.table(inFile$datapath,header=T)
-    df <- NULL
-    try(df<-filter(df.raw,input$add), silent = TRUE)
-    return(df)
-  })
-  
-  observe({
-    if(is.null(input$file)){return(NULL)}
-    if (input$freeze){
-      fdf<-Data()
-      frozen_items<-names(fdf[,sapply(fdf,is.numeric),drop=F])
+    df<-read.table(inFile$datapath,header=T)
+    if(input$execute){
+      try({
+        df<-filter(df,input$add)
+        return(df)
+      })
+      return<-NULL
+    }
+    else{
+      return(df)
     }
   })
   
@@ -115,9 +114,9 @@ shinyServer(function(input, output,session) {
    if(!input$freeze){
     fdf<-Data()
     items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-   tagList(
-     selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
-   )
+    tagList(
+      selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
+    )
    }
  })
   
@@ -164,12 +163,14 @@ shinyServer(function(input, output,session) {
  output$dplot_cols <- renderUI({
    if(is.null(input$file)){return(NULL)}
    #fdf<-filter(input$filts)
-   fdf<-Data()
-   items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-   tagList(
-     selectInput("dx", "Column to plot",items),
-     selectInput("dy", "Column to plot",items)
-   )
+   if(!input$freeze){
+     fdf<-Data()
+     items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+     tagList(
+       selectInput("dx", "Column to plot",items),
+       selectInput("dy", "Column to plot",items)
+     )
+   }
  })
  
    ##2d plot
@@ -221,13 +222,15 @@ shinyServer(function(input, output,session) {
   output$bin_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
     #fdf<-filter(input$filts)
-    fdf<-Data()
-    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-    tagList(
-      selectInput("bx", "Column to bin X-axis by",items), 
-      selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
-      selectInput("baxis3", "Column to plot on separate axis (e.g. length of regions)",c("NA",items))
-    )
+    if(!input$freeze){
+      fdf<-Data()
+      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      tagList(
+        selectInput("bx", "Column to bin X-axis by",items), 
+        selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
+        selectInput("baxis3", "Column to plot on separate axis (e.g. length of regions)",c("NA",items))
+      )
+    }
   })
   
   ##bin plot
@@ -248,19 +251,21 @@ shinyServer(function(input, output,session) {
   output$t_cols <- renderUI({
     if(is.null(input$file)){return(NULL)}
     #fdf<-filter(input$filts)
-    fdf<-Data()
-    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-    tagList(
-      selectInput("tx", "X-axis",items), 
-      numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
-      checkboxInput("tlogx","Log",value = F),
-      selectInput("ty", "Y-axis",items),
-      numericInput("tys","Scale",1),
-      checkboxInput("tlogy","Log",value = F),
-      selectInput("tz", "Colour by",items),
-      numericInput("tzs","Scale",1),
-      checkboxInput("tlogz","Log",value = F)
-      )
+    if(!input$freeze){
+      fdf<-Data()
+      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      tagList(
+        selectInput("tx", "X-axis",items), 
+        numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
+        checkboxInput("tlogx","Log",value = F),
+        selectInput("ty", "Y-axis",items),
+        numericInput("tys","Scale",1),
+        checkboxInput("tlogy","Log",value = F),
+        selectInput("tz", "Colour by",items),
+        numericInput("tzs","Scale",1),
+        checkboxInput("tlogz","Log",value = F)
+        )
+    }
   })
   
   ##tile plots
