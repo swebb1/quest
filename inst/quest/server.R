@@ -1,4 +1,3 @@
-
 shinyServer(function(input, output,session) {
 
   filter<-function(d,fstring){

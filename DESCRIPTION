@@ -1,0 +1,13 @@
+Package: quest
+Title:Quest: Data exploration
+Version: 1.0
+Authors@R: person("Shaun", "Webb", email = "shaunmwebb@gmail.com", role = c("aut", "cre"))
+Description: Tools and interactive app for exploring data in tabular format.
+Depends:
+    R (>= 3.3.1)
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    shiny
+RoxygenNote: 5.0.1

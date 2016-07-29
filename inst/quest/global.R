@@ -2,7 +2,6 @@ library(shiny)
 library(ggplot2)
 library(reshape2)
 library(corrplot)
-library(questplots)
 library(RColorBrewer)
 library(d3heatmap)
 
