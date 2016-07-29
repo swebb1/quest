@@ -22,9 +22,9 @@ shinyUI(dashboardPage(
       )
   ),
   dashboardBody(
-   #tags$head(
-    #tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
-   #),
+   tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+   ),
    tabItems(
      tabItem(tabName="files",
                fluidRow(
