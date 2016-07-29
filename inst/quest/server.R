@@ -28,9 +28,8 @@ shinyServer(function(input, output,session) {
   
 
   Data<-reactive({
-    df<-test
     if(is.null(input$file) & is.null(input$files)){
-      return(df)
+      df<-test
     }
     if(input$inputType=="Upload"){
       inFile<-input$file
