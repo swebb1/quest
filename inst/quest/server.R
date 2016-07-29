@@ -31,7 +31,7 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file) & is.null(input$files)){
       df<-test
     }
-    if(input$inputType=="Upload"){
+    else if(input$inputType=="Upload"){
       inFile<-input$file
       if(is.null(inFile)){
         return(NULL)
