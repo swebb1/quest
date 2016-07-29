@@ -29,6 +29,7 @@ shinyServer(function(input, output,session) {
   
 
   Data<-reactive({
+    df<-test
     if(is.null(input$file) & is.null(input$files)){
       return(df)
     }
@@ -132,6 +133,7 @@ shinyServer(function(input, output,session) {
   
  ##1d plot
  output$plot <- renderPlot({ 
+   if(is.null(input$file) & is.null(input$files)){return(NULL)}
    par(mar=c(10,5,5,5))
    withProgress(message="Plotting...",value=0,{
    fdf<-Data()
@@ -185,6 +187,7 @@ shinyServer(function(input, output,session) {
  
    ##2d plot
    output$dplot <- renderPlot({ 
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
      withProgress(message="Plotting...",value=0,{
      fdf<-Data()
      #fdf<-filter(input$filts)
@@ -245,6 +248,7 @@ shinyServer(function(input, output,session) {
   
   ##bin plot
   output$bplot <- renderPlot({ 
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     fdf<-Data()
     #fdf<-filter(input$filts)
     if(input$auto){
@@ -280,6 +284,7 @@ shinyServer(function(input, output,session) {
   
   ##tile plots
   output$tplot <- renderPlot({ 
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     if(length(input$tx)==0 | length(input$ty)==0 | length(input$tz)==0){
       return(NULL)
     }
@@ -308,6 +313,7 @@ shinyServer(function(input, output,session) {
     }
   })
   output$hmap<-renderD3heatmap({
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     fdf<-Data()
     m<-as.matrix(fdf[1:input$hnrow,c(input$hcols)])
     rownames(m)<-as.character(fdf[1:input$hnrow,input$hrows])
