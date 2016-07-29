@@ -4,12 +4,15 @@ library(reshape2)
 library(corrplot)
 library(questplots)
 library(RColorBrewer)
+library(d3heatmap)
 
 #set maximum file size
-options(shiny.maxRequestSize=100*1024^2) #100Mb
+options(shiny.maxRequestSize=500*1024^2) #500Mb
 
 #setup a color pallete choice on main dashboard or per tool?
 cols<-brewer.pal(9,"Set1")
+
+test<-data.frame(A=seq(1,10),B=seq(1,40,4),C=seq(1,100,10))
 
 ####Deprecated code####
 #set up the directory to extract datafiles  from
@@ -42,12 +45,35 @@ shinyServer(function(input, output,session) {
     df
   } 
   
+  observeEvent(input$list_dir, {
+    withProgress(message="Listing files...",value=0,{
+      output$inFiles <- renderUI({
+        tagList(
+          radioButtons('files', 'Select file:',list.files(input$dir,include.dirs = F,recursive=input$recursive,full.names = T,pattern=input$pattern))
+        )
+      })
+    })
+  })
+  
+
   Data<-reactive({
-    inFile<-input$file
-    if(is.null(inFile)){
-      return(NULL)
+    if(is.null(input$file) & is.null(input$files)){
+      return(df)
     }
-    df<-read.table(inFile$datapath,header=T)
+    if(input$inputType=="Upload"){
+      inFile<-input$file
+      if(is.null(inFile)){
+        return(NULL)
+      }
+      df<-read.table(inFile$datapath,header=input$header)
+    }
+    else if(input$inputType=="Server"){
+        inFile<-input$files
+        if(is.null(inFile)){
+          return(NULL)
+        }
+        df<-read.table(inFile,header=input$header)
+    }
     if(input$execute){
       try({
         df<-filter(df,input$add)
@@ -60,11 +86,23 @@ shinyServer(function(input, output,session) {
     }
   })
   
+  output$downloadFiles<-renderUI({
+    downloadName<-"Table.tab"
+    if(input$inputType=="Server" & !is.null(input$files)){
+      downloadName<-basename(input$files)
+    }
+    else if(input$inputType=="Upload" & !is.null(input$file)){
+      inFile<-input$file
+      downloadName<-inFile$name
+    }
+    tagList(
+      textInput("tableName","Table Name:",value = downloadName),
+      downloadButton('downloadData', 'Download Table')
+    )
+  })
+  
   ##output table
   output$table = renderDataTable({
-    if(is.null(input$file)){
-      return(NULL)
-    }
     fdf<-Data()
     #fdf<-filter(input$filts)
     fdfc<-fdf[, input$show_vars, drop = FALSE]  ##show selected columns
@@ -78,33 +116,33 @@ shinyServer(function(input, output,session) {
   )
   
   ##table controls
-  output$show_cols<-renderUI({
-    if(is.null(input$file)){return(NULL)}
-    fdf<-filter(input$add)
-    fdf<-Data()
-    items=names(fdf)
-    tagList(
-      checkboxGroupInput('show_vars', 'Columns to show:', items, selected = items)
-    )
-  })
+  #output$show_cols<-renderUI({
+  #  if(is.null(input$file)){return(NULL)}
+  #  fdf<-filter(input$add)
+  #  fdf<-Data()
+  #  items=names(fdf)
+  #  tagList(
+  #    checkboxGroupInput('show_vars', 'Columns to show:', items, selected = items)
+  #  )
+  #})
   #outputOptions(output, 'show_cols', suspendWhenHidden=FALSE)
   
   ##Observe check box input for select/deselect all columns
   observe({
     if(is.null(input$file)){return(NULL)}
     fdf<-Data()
-    if (input$show_all){
-        updateCheckboxGroupInput(
-          session, 'show_vars','Columns to show:', choices = names(fdf),
-          selected = names(fdf)
-        )
-    }
-    else{
-        updateCheckboxGroupInput(
-          session, 'show_vars','Columns to show:', choices = names(fdf),
-          selected = NULL
-        )
-    }  
+   # if (input$show_all){
+    #    updateCheckboxGroupInput(
+    #      session, 'show_vars','Columns to show:', choices = names(fdf),
+    #      selected = names(fdf)
+    #    )
+  #  }
+  #  else{
+  #      updateCheckboxGroupInput(
+  #        session, 'show_vars','Columns to show:', choices = names(fdf),
+  #        selected = NULL
+  #      )
+  #  }  
   })
 
  ##1d plot controls
@@ -270,6 +308,9 @@ shinyServer(function(input, output,session) {
   
   ##tile plots
   output$tplot <- renderPlot({ 
+    if(length(input$tx)==0 | length(input$ty)==0 | length(input$tz)==0){
+      return(NULL)
+    }
     fdf<-Data()
     #fdf<-filter(input$filts)
     if(input$auto){
@@ -280,13 +321,36 @@ shinyServer(function(input, output,session) {
     }  
   })
   
+  ##heatmap
+  ##bin plot controls
+  output$h_cols <- renderUI({
+    if(is.null(input$file)){return(NULL)}
+    #fdf<-filter(input$filts)
+    if(!input$freeze){
+      fdf<-Data()
+      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      rnames=names(fdf)
+      tagList(
+        selectInput("hrows", "Column to use for row names:",rnames), 
+        selectInput("hcols", "Columns to include in heatmap",items,multiple=T,selected = items[1:2])      )
+    }
+  })
+  output$hmap<-renderD3heatmap({
+    fdf<-Data()
+    m<-as.matrix(fdf[1:input$hnrow,c(input$hcols)])
+    rownames(m)<-as.character(fdf[1:input$hnrow,input$hrows])
+    colnames(m)<-c(input$hcols)
+    colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+    d3heatmap(m, scale = "none",k_row=input$hkrow,cexRow = 0.7,cexCol=0.7)
+  })
+  
   # Download
   output$downloadData <- downloadHandler(
     filename = function() {input$tableName},
     content = function(file) {
       fdf<-Data()
       #fdf<-filter(input$filts)
-      fdf<-fdf[, input$show_vars, drop = FALSE]
+      #fdf<-fdf[, input$show_vars, drop = FALSE]
       write.table(fdf, file,sep="\t",quote=F,row.names=F)
     }
   )

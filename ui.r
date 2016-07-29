@@ -14,6 +14,7 @@ shinyUI(dashboardPage(
         menuItem("2D plots",tabName="2d",icon=shiny::icon("line-chart")),
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
         menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
+        menuItem("Heatmaps",tabName="heatmap",icon=shiny::icon("th")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
         checkboxInput("freeze","Freeze inputs",value = F),
@@ -21,30 +22,39 @@ shinyUI(dashboardPage(
       )
   ),
   dashboardBody(
-   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
-   ),
+   #tags$head(
+    #tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+   #),
    tabItems(
      tabItem(tabName="files",
                fluidRow(
                  box(
                    title="Load from your computer",width = NULL,status="primary",solidHeader=TRUE,
                    #htmlOutput("fileUI"),
-                   fileInput("file", "Input File",multiple = FALSE), ##May add upload file option)
-                   checkboxInput("show", "Show columns", FALSE),
-                   checkboxInput('show_all', 'All/None', TRUE),
+                   selectInput("inputType","Input file location:",choices=c("Upload","Server")),
                    conditionalPanel(
-                     condition = "input.show == true",
-                     uiOutput("show_cols")
-                   )
-                 ),
-                 box(
-                   title="Load from server",width = NULL,status="primary",solidHeader=TRUE
+                     condition = "input.inputType == 'Upload'",
+                     fileInput("file", "Input File",multiple = FALSE) ##May add upload file option)
+                   ),
+                   conditionalPanel(
+                     condition = "input.inputType == 'Server'",
+                     textInput("dir","Select file directory:",value="/homes/swebb/interactive_plotting/Odyssey/test_data"),
+                     checkboxInput("recursive", "Search directory recursively", FALSE),
+                     textInput("pattern","Search pattern","",placeholder="*.tab"),
+                     actionButton("list_dir","List",icon = shiny::icon("folder-open")),
+                     uiOutput("inFiles")
+                   ),
+                   #checkboxInput("show", "Show columns", FALSE),
+                   #checkboxInput('show_all', 'All/None', TRUE),
+                   #conditionalPanel(
+                   #condition = "input.show == true",
+                    #uiOutput("show_cols")
+                   #),
+                   checkboxInput("header", "File has column headers", TRUE)
                  ),
                  box(
                    title="Download table",width = NULL,status="primary",solidHeader=TRUE,
-                   textInput("tableName","Table Name:",value = "Table.tab"),
-                   downloadButton('downloadData', 'Download Table')
+                   uiOutput("downloadFiles")
                  )
              )
      ),
@@ -157,6 +167,25 @@ shinyUI(dashboardPage(
                )
              )
      ),
+     tabItem(tabName="heatmap",
+             fluidRow(
+               box(
+                 title="Heatmaps",width = 8,status="primary",solidHeader=TRUE,
+                 d3heatmapOutput("hmap")
+               ),
+               box(
+                 title="Data",width = 4,status="success",solidHeader=TRUE,
+                 uiOutput("h_cols")
+               )
+             ),
+             fluidRow(
+               box(
+                 title="Controls",width = 12,status="success",solidHeader=TRUE,
+                 numericInput("hnrow","Row limit",100,min=1,max=2000),
+                 numericInput("hkrow","Number of K-means clusters",5,min=1,max=10)
+               )
+             )
+     ),
      tabItem(tabName="help",
              fluidRow(
                box(
@@ -169,7 +198,7 @@ shinyUI(dashboardPage(
    fluidRow(
      box(
        title="R Code",width = NULL,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
-       tags$textarea(id="add", rows=6, cols=200, ""),
+       HTML('<textarea id="add" rows="6" cols="200"></textarea>'),
        helpText("See help tab for examples")
      )
    )
