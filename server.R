@@ -1,31 +1,3 @@
-library(shiny)
-library(ggplot2)
-library(reshape2)
-library(corrplot)
-library(questplots)
-library(RColorBrewer)
-library(d3heatmap)
-
-#set maximum file size
-options(shiny.maxRequestSize=500*1024^2) #500Mb
-
-#setup a color pallete choice on main dashboard or per tool?
-cols<-brewer.pal(9,"Set1")
-
-test<-data.frame(A=seq(1,10),B=seq(1,40,4),C=seq(1,100,10))
-
-####Deprecated code####
-#set up the directory to extract datafiles  from
-#path <- "/homes/swebb/data/tables"
-#read files in directory 
-#myfiles <- list.files(path=path)
-#myfiles <- grep ##Work out how to only select certain files
-#reconstruct full path name for each file 
-#temp = paste(path,myfiles, sep='/')
-##read the contents of each file, and assign to a data.frame with the same name as the filename
-#for (i in 1:length(myfiles)) assign(myfiles[i], read.table(temp[i],header=T))
-#df<-read.table("/homes/swebb/data/published//PNAS_2015_Zhogbi_GSE66870//deseq/Zhogbi_master_table_deseq_results.tab",header=T)
-####
 
 shinyServer(function(input, output,session) {
 
