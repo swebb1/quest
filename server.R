@@ -119,7 +119,7 @@ shinyServer(function(input, output,session) {
 
  ##1d plot controls
  output$plot_cols <- renderUI({
-   if(is.null(input$file)){return(NULL)}
+   if(is.null(input$file) & is.null(input$files)){return(NULL)}
    #fdf<-filter(input$filts)
    if(!input$freeze){
     fdf<-Data()
@@ -171,7 +171,7 @@ shinyServer(function(input, output,session) {
   
  ##2d plot cols
  output$dplot_cols <- renderUI({
-   if(is.null(input$file)){return(NULL)}
+   if(is.null(input$file) & is.null(input$files)){return(NULL)}
    #fdf<-filter(input$filts)
    if(!input$freeze){
      fdf<-Data()
@@ -230,7 +230,7 @@ shinyServer(function(input, output,session) {
   
   ##bin plot controls
   output$bin_cols <- renderUI({
-    if(is.null(input$file)){return(NULL)}
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
       fdf<-Data()
@@ -259,7 +259,7 @@ shinyServer(function(input, output,session) {
   
   ##tile controls
   output$t_cols <- renderUI({
-    if(is.null(input$file)){return(NULL)}
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
       fdf<-Data()
@@ -296,7 +296,7 @@ shinyServer(function(input, output,session) {
   ##heatmap
   ##bin plot controls
   output$h_cols <- renderUI({
-    if(is.null(input$file)){return(NULL)}
+    if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
       fdf<-Data()
