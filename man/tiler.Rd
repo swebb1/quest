@@ -6,12 +6,12 @@
 \usage{
 tiler(t, x, xl = F, xs = 1, y, yl = F, ys = 1, z, zl = F, zs = 1,
   bin = 1, min = -5, max = 5, xrange = c(-100, 100), yrange = c(-100,
-  100), func = "median", col = cols)
+  100), func = "median", col = cols, smooth = NA)
 }
 \arguments{
 \item{t}{Table of data}
 
-\item{x, y, z}{Variables for each scale}
+\item{x, y, z}{Variables for each dimension}
 
 \item{xl, yl, zl}{Log the variable first. Defaults to F.}
 
@@ -26,6 +26,8 @@ tiler(t, x, xl = F, xs = 1, y, yl = F, ys = 1, z, zl = F, zs = 1,
 \item{yrange}{Range displayed on y-axis. Defaults to c(-100,100)}
 
 \item{func}{Function applied to tiled z variables ("median","mean","sum","count"). Defaults to median.}
+
+\item{smooth}{Add a smoothing line, options are lm,glm,gam,loess,rlm. Off by default.}
 
 \item{cols}{Vector of colours for colour range. Defaults to colorRamps::matlab.like2(10)}
 }

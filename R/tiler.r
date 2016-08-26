@@ -3,7 +3,7 @@
 #' This function plots 3 variables on an x,y and coloured z scale. Values on the x and y scale are tiled
 #' and the colour of the tile is determined by the function applied to z (mean,median,count etc.).
 #' @param t Table of data
-#' @param x,y,z Variables for each scale
+#' @param x,y,z Variables for each dimension
 #' @param xl,yl,zl Log the variable first. Defaults to F.
 #' @param xs,ys,zs Scale the variable first. Defaults to 1.
 #' @param bin Size of each tile
@@ -12,12 +12,13 @@
 #' @param yrange Range displayed on y-axis. Defaults to c(-100,100)
 #' @param cols Vector of colours for colour range. Defaults to colorRamps::matlab.like2(10)
 #' @param func Function applied to tiled z variables ("median","mean","sum","count"). Defaults to median.
+#' @param smooth Add a smoothing line, options are lm,glm,gam,loess,rlm. Off by default.
 #' @keywords tile plots
 #' @export
 #' @examples
 #' tiler()
 
-tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=c(-100,100),yrange=c(-100,100),func="median",col=cols){
+tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=c(-100,100),yrange=c(-100,100),func="median",col=cols,smooth=NA){
   library(bigvis)
   library(colorRamps)
   cols<-matlab.like2(10)
@@ -37,6 +38,8 @@ tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=
   ss<-paste(z,".",func,sep="")
   pp<-NULL;
   pp<-p + geom_tile(aes_string(fill=ss))+ scale_fill_gradientn(space = "Lab",limits = c(min,max),oob = scales::squish,colours=col)+xlim(xrange)+ylim(yrange)
-  pp<-pp + stat_smooth(method="lm", se=T, colour="black",size=1)
+  if(!is.na(smooth)){
+    pp<-pp + stat_smooth(method=smooth, se=T, colour="black",size=1)
+  }
   return(pp)
 }  

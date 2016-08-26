@@ -12,13 +12,15 @@ shinyUI(dashboardPage(
         menuItem("Data Table",tabName="data",icon=shiny::icon("database")),
         menuItem("1D plots",tabName="1d",icon=shiny::icon("line-chart")),
         menuItem("2D plots",tabName="2d",icon=shiny::icon("line-chart")),
+        menuItem("ggplot wrapper",tabName="gg",icon=shiny::icon("line-chart")),
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
         menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
         menuItem("Heatmaps",tabName="heatmap",icon=shiny::icon("th")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
         checkboxInput("freeze","Freeze inputs",value = F),
-        checkboxInput("execute","Apply R code",value = F)
+        checkboxInput("execute","Apply R code",value = F),
+        actionButton("close","Close Quest",icon = shiny::icon("close"),style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
       )
   ),
   dashboardBody(
@@ -107,6 +109,28 @@ shinyUI(dashboardPage(
                            checkboxInput("logx","Log X-axis",value = F),
                            checkboxInput("logy","Log Y-axis",value = F),
                            textInput("hilite","Highlight subset",value="")
+                 )
+               )
+             )
+     ),
+     tabItem(tabName="gg",
+             fluidRow(
+               box(
+                 title="gg plot",width = 8,status="primary",solidHeader=TRUE,
+                 plotOutput("ggplot")
+               ),
+               box(
+                 title="Data",width = 4,collapsible = T,status="success",solidHeader=TRUE,
+                 wellPanel(p(strong("Data")), 
+                           uiOutput("ggplot_cols")
+                 )
+               )
+             ),
+             fluidRow(
+               box(
+                 title="Controls",width = NULL,collapsible = T,status="success",solidHeader=TRUE,
+                 wellPanel(p(strong("Controls")),
+                           uiOutput("ggplot_controls")
                  )
                )
              )

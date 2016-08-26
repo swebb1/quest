@@ -1,8 +1,14 @@
 shinyServer(function(input, output,session) {
 
+  ##close app button
+  observeEvent(input$close, {
+    stopApp()
+  })
+  
+  ##filter function based on R code
   filter<-function(d,fstring){
     df<-d
-    if(fstring != ""){ ##add columns if adds exist
+    if(fstring != ""){
       withProgress(message="Applying operation...",value=0,{
         a<-strsplit(fstring,"@")
         for(i in 1:length(a[[1]])){
@@ -16,6 +22,7 @@ shinyServer(function(input, output,session) {
     df
   } 
   
+  ##List available files in directory
   observeEvent(input$list_dir, {
     withProgress(message="Listing files...",value=0,{
       output$inFiles <- renderUI({
@@ -26,7 +33,7 @@ shinyServer(function(input, output,session) {
     })
   })
   
-
+  ##Get data
   Data<-reactive({
     if(is.null(input$file) & is.null(input$files)){
       df<-test
@@ -57,6 +64,7 @@ shinyServer(function(input, output,session) {
     }
   })
   
+  ##Create a file download button
   output$downloadFiles<-renderUI({
     downloadName<-"Table.tab"
     if(input$inputType=="Server" & !is.null(input$files)){
@@ -227,7 +235,101 @@ shinyServer(function(input, output,session) {
      }
      })
    })
-  
+
+   ##ggplot data
+   output$ggplot_cols <- renderUI({
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     #fdf<-filter(input$filts)
+     if(!input$freeze){
+       fdf<-Data()
+       items=names(fdf) #get numeric columns only
+       tagList(
+         selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin")),
+         selectInput("ggx", "Select x-axis",items), 
+         selectInput("ggy", "Select y-axis",items),
+         selectInput("ggz", "Select z-axis",items),
+         checkboxInput("gg_logx","Log x-axis"),
+         checkboxInput("gg_logy","Log y-axis"),
+         selectInput("gg_facet", "Facet plot by:",c("NA",items)),
+         numericInput("gg_xrotate","Rotate X-axis labels",0),
+         checkboxInput("gg_plotly","Plotly"),
+         selectInput("gg_theme", "Plot theme:",c("grey","bw","dark","light","void","linedraw","minimal","classsic")),
+         checkboxInput("gg_manual","Set axes manually:",F),
+         selectInput("gg_fill","Colour Fill by:",c("NA",items)),
+         selectInput("gg_colour","Colour points by:",c("NA",items)),
+         conditionalPanel(
+           condition = "input.gg_manual == true",
+           numericInput("gg_ymin","X-axis minimum",NULL),
+           numericInput("gg_ymax","X-axis maximum",NULL),
+           numericInput("gg_ymin","Y-axis minimum",NULL),
+           numericInput("gg_ymax","Y-axis maximum",NULL)
+         )
+       )
+     }
+   })  
+   ##ggplot controls
+   output$ggplot_controls <- renderUI({
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     #fdf<-filter(input$filts)
+     if(!input$freeze){
+       fdf<-Data()
+       items=names(fdf) #get numeric columns only
+       tagList(
+         conditionalPanel(condition="input.gg_geom == 'histogram'",
+              numericInput("gg_bins","Number of bins to use (0=default):",0)
+         ),
+         conditionalPanel(condition="input.gg_geom == 'bar'",
+              selectInput("gg_bar.position","Bar positioning",c("stack","dodge","fill"))
+         ),
+         conditionalPanel(condition="input.gg_geom == 'point'",
+              selectInput("gg_smooth","Add a smoothing line to points",c("NA","auto","gam","lm","glm","rlm","loess"))
+         ),
+         conditionalPanel(condition="input.gg_geom == 'line'"
+         ),
+         conditionalPanel(condition="input.gg_geom == 'boxplot'",
+              checkboxInput("gg_outliers","Remove outliers from plot")
+         ),  
+         conditionalPanel(condition="input.gg_geom == 'violin'"         )
+       )
+     }
+   })
+   
+   ##ggplot
+   output$ggplot <- renderPlot({ 
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     fdf<-Data()
+     #fdf<-filter(input$filts)
+     if(input$auto){
+       xlim=NA
+       ylim=NA
+       if(input$gg_manual==T){
+        xlim<-c(input$gg_xmin,input$gg_xmax)
+        ylim<-c(input$gg_ymin,input$gg_ymax)
+       }
+       fill=NA
+       colour=NA
+       facet=NA
+       smooth=NA
+       if(input$gg_fill != "NA"){
+         fill = input$gg_fill
+       }
+       if(input$gg_colour != "NA"){
+         colour = input$gg_colour
+       }
+       if(input$gg_smooth != "NA"){
+         smooth = input$gg_smooth
+       }
+       if(input$gg_facet != "NA"){
+         facet = input$gg_facet
+       }
+         ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+                        geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
+                        fill=fill,bar.position = input$gg_bar.position,theme = input$gg_theme,
+                        enable.plotly = input$gg_plotly,outliers=input$gg_outliers,bins = input$gg_bins,
+                        xlim=xlim,ylim=ylim)    
+
+     }  
+   })
   
   ##bin plot controls
   output$bin_cols <- renderUI({
