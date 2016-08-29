@@ -12,8 +12,11 @@
 #' @param xrotate Angle to rotate x-axis labels (90=vertical)
 #' @param colour A variable to colour by
 #' @param fill A variable to fill by
+#' @param man_colour Select a solid colour
+#' @param man_fill Select a solid fill colour
 #' @param bar.position Position of bars in a bar plot (stack,dodge,fill)
-#' @param bins Number of bins to use in a binned plot (histogram)
+#' @param bins Add a stat_bin with this number of bins
+#' @param binwidth Size of binwidth in binned plots (histogram)
 #' @param outliers Set outliers=F to remove outliers from boxplot
 #' @param enable.plotly convert to interactive Plotly plot
 #' @param theme Set ggplot theme (grey,bw,dark,light,void,linedraw,minimal,classsic)
@@ -23,44 +26,61 @@
 #' ggplot_builder()
 
 
-ggplot_builder<-function(d,x,y,z,geom="point",facet=NA,smooth=NA,xlim=NA,ylim=NA,xrotate=0,colour=NA,
-                         fill=NA,bar.position="stack",bins=0,outliers=T,enable.plotly=F,
-                         theme="grey",logx=F,logy=F){
+ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,xlim=NA,ylim=NA,xrotate=0,colour=NA,
+                         fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,enable.plotly=F,
+                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA){
 library(plotly)  
+a<-list()
+g<-list()
 if(geom=="point"){
-  if(is.na(colour)){
-    p<-ggplot(d,aes_string(x=x,y=y)) + geom_point()
+  a$x<-x
+  a$y<-y
+  if(!is.na(colour)){
+    a$colour<-colour
   }
-  else{
-    p<-ggplot(d,aes_string(x=x,y=y)) + geom_point(aes_string(colour=colour))
+  if(!is.na(man_colour)){
+    g$colour<-man_colour
   }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_point,g)
 }
 if(geom=="line"){
-  if(is.na(colour)){
-    p<-ggplot(d,aes_string(x=x,y=y)) + geom_line()
+  a$x<-x
+  a$y<-y
+  if(!is.na(colour)){
+    a$colour<-colour
   }
-  else{
-    p<-ggplot(d,aes_string(x=x,y=y)) + geom_line(aes_string(colour=colour))
+  if(!is.na(man_colour)){
+    g$colour<-man_colour
   }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_line,g)
 }
 else if(geom=="bar"){
-  if(is.na(fill)){
-    p<-ggplot(d,aes_string(x=x))+geom_bar(position = bar.position)
+  a$x<-x
+  if(!is.na(fill)){
+    a$fill<-fill
   }
-  else{
-    p<-ggplot(d,aes_string(x=x,fill=fill))+geom_bar(position=bar.position)
+  g$position<-bar.position
+  if(!is.na(man_fill)){
+    g$fill<-man_fill
   }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_bar,g)
 }
 else if(geom=="histogram"){
-  if(is.na(fill)){
-    p<-ggplot(d,aes_string(x=x))+geom_histogram()
+  a$x<-x
+  if(!is.na(fill)){
+    a$fill<-fill
   }
-  else{
-    p<-ggplot(d,aes_string(x=x,fill=fill))+geom_histogram()
+  if(!is.na(man_fill)){
+    g$fill<-man_fill
   }
-  if(bins>0){
-    p<-p+stat_bin(bins=bins)
+  if(binwidth>0){
+    g$binwidth<-binwidth
   }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_histogram,g)
 }
 else if(geom=="boxplot"){
     if(is.na(fill)){
@@ -84,6 +104,7 @@ else if(geom=="violin"){
     p<-ggplot(d,aes_string(x=x,y=y,fill=fill))+geom_violin()
   }
 }
+p<-ggplot(d,as)+geo
 if(!is.na(facet)){
   p<-p+facet_wrap(c(facet))
 }
@@ -95,22 +116,40 @@ if(!is.na(smooth) & geom %in% c("point")){
     p<-p+geom_smooth(method = smooth)
   }
 }
-if(!is.na(xlim)){
+if(bins>0 & geom %in% c("histogram","bar") & is.numeric(d[,x])) {
+  p<-p+stat_bin(bins=bins)
+}
+if(!is.na(xlim) & is.numeric(d[,x])){
   p<-p+xlim(xlim)
 }
 if(!is.na(ylim)){
-  p<-p+ylim(ylim)
+  if(!is.null(a$y)){#if y aesthetic exists
+    if(is.numeric(d[,y])){ #if y aestheitc is numeric
+      p<-p+ylim(ylim)
+    }
+  }
+  else{
+    p<-p+ylim(ylim)
+  }
+}
+if(logx & is.numeric(x)){
+  p<-p+ scale_x_log10()
+}
+if(logy){
+  if(!is.null(a$y)){ #if y aesthetic exists
+    if(is.numeric(d[,y])){ #if y aestheitc is numeric
+      p<-p+ scale_y_log10()
+    }
+  }
+  else{
+    p<-p+ scale_y_log10()
+  }
 }
 p<-switch(theme,grey=p+theme_grey(),dark=p+theme_dark(),light=p+theme_light(),linedraw=p+theme_linedraw(),bw=p+theme_bw(),minimal=p+theme_minimal(),classic=p+theme_classic(),void=p+theme_void(),p+theme_grey())
 if(xrotate!=0){
   p<-p+theme(axis.text.x=element_text(angle=xrotate,hjust=1,vjust=0.5))
 }
-if(logy){
-  p<-p+ scale_y_log10()
-}
-if(logx){
-  p<-p+ scale_x_log10()
-}
+
 #p<-p + scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 if(enable.plotly){
   return(ggplotly(p))

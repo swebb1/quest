@@ -245,28 +245,54 @@ shinyServer(function(input, output,session) {
        items=names(fdf) #get numeric columns only
        tagList(
          selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin")),
-         selectInput("ggx", "Select x-axis",items), 
+         selectInput("ggx", "Select x-axis",items),
          selectInput("ggy", "Select y-axis",items),
-         selectInput("ggz", "Select z-axis",items),
+         #selectInput("ggz", "Select z-axis",items),
          checkboxInput("gg_logx","Log x-axis"),
          checkboxInput("gg_logy","Log y-axis"),
-         selectInput("gg_facet", "Facet plot by:",c("NA",items)),
+         selectInput("gg_facet", "Facet plot by:",c("NA",items))
+       )
+     }
+   })  
+  
+   output$ggplot_colours <- renderUI({
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     #fdf<-filter(input$filts)
+     if(!input$freeze){
+       fdf<-Data()
+       items=names(fdf) #get numeric columns only
+       tagList(
+          selectInput("gg_fill","Colour Fill by:",c("NA",items)),
+          selectInput("gg_colour","Colour points by:",c("NA",items)),
+          selectInput("gg_man_colour","Solid colour:",c("NA","firebrick","forest green","dodger blue")),
+          selectInput("gg_man_fill","Solid fill:",c("NA","firebrick","forest green","dodger blue"))
+      )
+     }
+   })  
+   
+   ##ggplot controls
+   output$ggplot_plot <- renderUI({
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     #fdf<-filter(input$filts)
+     if(!input$freeze){
+       fdf<-Data()
+       items=names(fdf) #get numeric columns only
+       tagList(
          numericInput("gg_xrotate","Rotate X-axis labels",0),
-         checkboxInput("gg_plotly","Plotly"),
+         checkboxInput("gg_plotly","Activate Plotly"),
          selectInput("gg_theme", "Plot theme:",c("grey","bw","dark","light","void","linedraw","minimal","classsic")),
          checkboxInput("gg_manual","Set axes manually:",F),
-         selectInput("gg_fill","Colour Fill by:",c("NA",items)),
-         selectInput("gg_colour","Colour points by:",c("NA",items)),
          conditionalPanel(
            condition = "input.gg_manual == true",
-           numericInput("gg_ymin","X-axis minimum",NULL),
-           numericInput("gg_ymax","X-axis maximum",NULL),
+           numericInput("gg_xmin","X-axis minimum",NULL),
+           numericInput("gg_xmax","X-axis maximum",NULL),
            numericInput("gg_ymin","Y-axis minimum",NULL),
            numericInput("gg_ymax","Y-axis maximum",NULL)
          )
        )
      }
-   })  
+   })
+   
    ##ggplot controls
    output$ggplot_controls <- renderUI({
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
@@ -276,7 +302,7 @@ shinyServer(function(input, output,session) {
        items=names(fdf) #get numeric columns only
        tagList(
          conditionalPanel(condition="input.gg_geom == 'histogram'",
-              numericInput("gg_bins","Number of bins to use (0=default):",0)
+              numericInput("gg_binwidth","Bin widths (0=default):",0)
          ),
          conditionalPanel(condition="input.gg_geom == 'bar'",
               selectInput("gg_bar.position","Bar positioning",c("stack","dodge","fill"))
@@ -294,6 +320,12 @@ shinyServer(function(input, output,session) {
      }
    })
    
+   #Do not disactivate tabs
+   outputOptions(output, 'ggplot_cols', suspendWhenHidden=FALSE)
+   outputOptions(output, 'ggplot_colours', suspendWhenHidden=FALSE)
+   outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
+   outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
+   
    ##ggplot
    output$ggplot <- renderPlot({ 
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
@@ -308,6 +340,8 @@ shinyServer(function(input, output,session) {
        }
        fill=NA
        colour=NA
+       man_fill=NA
+       man_colour=NA
        facet=NA
        smooth=NA
        if(input$gg_fill != "NA"){
@@ -315,6 +349,12 @@ shinyServer(function(input, output,session) {
        }
        if(input$gg_colour != "NA"){
          colour = input$gg_colour
+       }
+       if(input$gg_man_fill != "NA"){
+         man_fill = input$gg_man_fill
+       }
+       if(input$gg_man_colour != "NA"){
+         man_colour = input$gg_man_colour
        }
        if(input$gg_smooth != "NA"){
          smooth = input$gg_smooth
@@ -324,13 +364,58 @@ shinyServer(function(input, output,session) {
        }
          ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                         geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
-                        fill=fill,bar.position = input$gg_bar.position,theme = input$gg_theme,
-                        enable.plotly = input$gg_plotly,outliers=input$gg_outliers,bins = input$gg_bins,
-                        xlim=xlim,ylim=ylim)    
+                        fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
+                        enable.plotly = input$gg_plotly,outliers=input$gg_outliers,
+                        xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill)    
 
      }  
    })
   
+   ###duplicated for plotly (can this be simplified?)
+   output$ggplotly <- renderPlotly({ 
+     if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     fdf<-Data()
+     #fdf<-filter(input$filts)
+     if(input$auto){
+       xlim=NA
+       ylim=NA
+       if(input$gg_manual==T){
+         xlim<-c(input$gg_xmin,input$gg_xmax)
+         ylim<-c(input$gg_ymin,input$gg_ymax)
+       }
+       fill=NA
+       colour=NA
+       man_fill=NA
+       man_colour=NA
+       facet=NA
+       smooth=NA
+       if(input$gg_fill != "NA"){
+         fill = input$gg_fill
+       }
+       if(input$gg_colour != "NA"){
+         colour = input$gg_colour
+       }
+       if(input$gg_man_fill != "NA"){
+         man_fill = input$gg_man_fill
+       }
+       if(input$gg_man_colour != "NA"){
+         man_colour = input$gg_man_colour
+       }
+       if(input$gg_smooth != "NA"){
+         smooth = input$gg_smooth
+       }
+       if(input$gg_facet != "NA"){
+         facet = input$gg_facet
+       }
+       ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+                      geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
+                      fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
+                      enable.plotly = input$gg_plotly,outliers=input$gg_outliers,
+                      xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill)    
+       
+     }  
+   })
+   
   ##bin plot controls
   output$bin_cols <- renderUI({
     if(is.null(input$file) & is.null(input$files)){return(NULL)}

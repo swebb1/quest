@@ -31,7 +31,7 @@ shinyUI(dashboardPage(
      tabItem(tabName="files",
                fluidRow(
                  box(
-                   title="Load from your computer",width = NULL,status="primary",solidHeader=TRUE,
+                   title="Load from your computer",width = 12,status="primary",solidHeader=TRUE,
                    #htmlOutput("fileUI"),
                    selectInput("inputType","Input file location:",choices=c("Upload","Server")),
                    conditionalPanel(
@@ -55,7 +55,7 @@ shinyUI(dashboardPage(
                    checkboxInput("header", "File has column headers", TRUE)
                  ),
                  box(
-                   title="Download table",width = NULL,status="primary",solidHeader=TRUE,
+                   title="Download table",width = 12,status="primary",solidHeader=TRUE,
                    uiOutput("downloadFiles")
                  )
              )
@@ -63,7 +63,7 @@ shinyUI(dashboardPage(
      tabItem(tabName="data",
              fluidRow(
                box(
-                 title = "Data Table", width = NULL, status = "primary",solidHeader=TRUE,
+                 title = "Data Table", width = 12, status = "primary",solidHeader=TRUE,
                  div(style = 'overflow-x: scroll', dataTableOutput('table'))
                )
              )
@@ -117,21 +117,19 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                  title="gg plot",width = 8,status="primary",solidHeader=TRUE,
-                 plotOutput("ggplot")
+                 conditionalPanel(condition="input.gg_plotly==false",
+                  plotOutput("ggplot")
+                 ),
+                 conditionalPanel(condition = "input.gg_plotly==true",
+                  plotlyOutput("ggplotly")
+                 )
                ),
-               box(
-                 title="Data",width = 4,collapsible = T,status="success",solidHeader=TRUE,
-                 wellPanel(p(strong("Data")), 
-                           uiOutput("ggplot_cols")
-                 )
-               )
-             ),
-             fluidRow(
-               box(
-                 title="Controls",width = NULL,collapsible = T,status="success",solidHeader=TRUE,
-                 wellPanel(p(strong("Controls")),
-                           uiOutput("ggplot_controls")
-                 )
+               tabBox(
+                 width = 4,
+                 tabPanel("Inputs",uiOutput("ggplot_cols")),
+                 tabPanel("Colours",uiOutput("ggplot_colours")),
+                 tabPanel("Layout",uiOutput("ggplot_plot")),
+                 tabPanel("Controls",uiOutput("ggplot_controls"))
                )
              )
      ),
@@ -221,7 +219,7 @@ shinyUI(dashboardPage(
    ), 
    fluidRow(
      box(
-       title="R Code",width = NULL,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
+       title="R Code",width = 12,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
        HTML('<textarea id="add" rows="6" cols="200"></textarea>'),
        helpText("See help tab for examples")
      )
