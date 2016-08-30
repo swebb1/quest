@@ -27,9 +27,15 @@
 
 
 ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,xlim=NA,ylim=NA,xrotate=0,colour=NA,
-                         fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,enable.plotly=F,
-                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA){
-library(plotly)  
+                         fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
+                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,
+                         gradient="default",gradient.steps=10,colourset="default",
+                         cut_method="number",cut.n=10){
+library(plotly)
+library(colorRamps)
+library(ggplot2)
+ml<-matlab.like2(gradient.steps)
+
 a<-list()
 g<-list()
 if(geom=="point"){
@@ -57,6 +63,9 @@ if(geom=="line"){
   geo<-do.call(geom_line,g)
 }
 else if(geom=="bar"){
+  if(!is.factor(d[,x])){
+    return(NULL)
+  }  
   a$x<-x
   if(!is.na(fill)){
     a$fill<-fill
@@ -69,6 +78,9 @@ else if(geom=="bar"){
   geo<-do.call(geom_bar,g)
 }
 else if(geom=="histogram"){
+  if(is.factor(d[,x])){
+    return(NULL)
+  }
   a$x<-x
   if(!is.na(fill)){
     a$fill<-fill
@@ -83,38 +95,76 @@ else if(geom=="histogram"){
   geo<-do.call(geom_histogram,g)
 }
 else if(geom=="boxplot"){
-    if(is.na(fill)){
-      p<-ggplot(d,aes_string(x=x,y=y))
-    }
-    else{
-      p<-ggplot(d,aes_string(x=x,y=y,fill=fill))
-    }
-    if(outliers==T){
-      p<-p+geom_boxplot()
-    }
-    else{
-      p<-p+geom_boxplot(outlier.shape=NA)
-    }
+  if(!is.numeric(d[,y])){
+    return(NULL)
+  }
+  a$x<-x
+  a$y<-y
+  if(!is.na(fill)){
+    a$fill<-fill
+  }
+  if(!is.na(man_fill)){
+    g$fill<-man_fill
+  }
+  if(!is.na(colour)){
+    a$colour<-colour
+  }
+  if(!is.na(man_colour)){
+    g$colour<-man_colour
+  }
+  if(is.numeric(d[,x])){
+    cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
+    a$group<-cut
+  }
+  if(outliers==F){
+    g$outlier.shape<-NA
+  }
+  if(varwidth==T){
+    g$varwidth<-T
+  }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_boxplot,g)
 }
 else if(geom=="violin"){
-  if(is.na(fill)){
-    p<-ggplot(d,aes_string(x=x,y=y))+geom_violin()
+  if(!is.numeric(d[,y])){
+    return(NULL)
   }
-  else{
-    p<-ggplot(d,aes_string(x=x,y=y,fill=fill))+geom_violin()
+  a$x<-x
+  a$y<-y
+  if(!is.na(fill)){
+    a$fill<-fill
   }
+  if(!is.na(man_fill)){
+    g$fill<-man_fill
+  }
+  if(!is.na(colour)){
+    a$colour<-colour
+  }
+  if(!is.na(man_colour)){
+    g$colour<-man_colour
+  }
+  if(is.numeric(d[,x])){
+    cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
+    a$group<-cut
+  }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_violin,g)
 }
 p<-ggplot(d,as)+geo
 if(!is.na(facet)){
   p<-p+facet_wrap(c(facet))
 }
 if(!is.na(smooth) & geom %in% c("point")){
-  if(!is.na(facet)){
-    p<-p+geom_smooth(method = smooth,aes_string(colour=facet,fill=facet)) 
+  s<-list()
+  if(!is.na(fill)){
+    s$fill<-fill
   }
-  else{
-    p<-p+geom_smooth(method = smooth)
+
+  if(!is.na(colour)){
+    s$colour<-colour
   }
+  statas<-do.call(aes_string,s)
+  p<-p+stat_smooth(method=smooth,statas)
 }
 if(bins>0 & geom %in% c("histogram","bar") & is.numeric(d[,x])) {
   p<-p+stat_bin(bins=bins)
@@ -132,8 +182,8 @@ if(!is.na(ylim)){
     p<-p+ylim(ylim)
   }
 }
-if(logx & is.numeric(x)){
-  p<-p+ scale_x_log10()
+if(logx & is.numeric(d[,x])){
+  p<-p+scale_x_log10()
 }
 if(logy){
   if(!is.null(a$y)){ #if y aesthetic exists
@@ -149,6 +199,11 @@ p<-switch(theme,grey=p+theme_grey(),dark=p+theme_dark(),light=p+theme_light(),li
 if(xrotate!=0){
   p<-p+theme(axis.text.x=element_text(angle=xrotate,hjust=1,vjust=0.5))
 }
+p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml)+scale_colour_gradientn(colours=ml))
+p<-switch(colourset,default=p,Set1=p+scale_colour_brewer(palette="Set1")+scale_fill_brewer(palette="Set1"),
+          Set2=p+scale_colour_brewer(palette="Set2")+scale_fill_brewer(palette="Set2"),
+          Set3=p+scale_colour_brewer(palette="Set3")+scale_fill_brewer(palette="Set3"),
+          Spectral=p+scale_colour_brewer(palette="Spectral")+scale_fill_brewer(palette="Spectral"))
 
 #p<-p + scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 if(enable.plotly){

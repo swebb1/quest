@@ -18,10 +18,12 @@
 #' @examples
 #' tiler()
 
-tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=c(-100,100),yrange=c(-100,100),func="median",col=cols,smooth=NA){
+tiler<-function(t,x,xl=F,xs=1,y,yl=F,ys=1,z,zl=F,zs=1,bin=1,min=-5,max=5,xrange=c(-100,100),yrange=c(-100,100),func="median",col=NA,smooth=NA){
   library(bigvis)
-  library(colorRamps)
-  cols<-matlab.like2(10)
+  if(is.na(col)){
+    library(colorRamps)
+    col<-matlab.like2(10)
+  }
   
   if(xl){t[,x]<-log(t[,x])}
   if(yl){t[,y]<-log(t[,y])}

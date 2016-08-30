@@ -43,14 +43,14 @@ shinyServer(function(input, output,session) {
       if(is.null(inFile)){
         return(NULL)
       }
-      df<-read.table(inFile$datapath,header=input$header)
+      df<-read.table(inFile$datapath,header=input$header,fill=T)
     }
     else if(input$inputType=="Server"){
         inFile<-input$files
         if(is.null(inFile)){
           return(NULL)
         }
-        df<-read.table(inFile,header=input$header)
+        df<-read.table(inFile,header=input$header,fill=T)
     }
     if(input$execute){
       try({
@@ -246,9 +246,9 @@ shinyServer(function(input, output,session) {
        tagList(
          selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin")),
          selectInput("ggx", "Select x-axis",items),
+         checkboxInput("gg_logx","Log x-axis"),
          selectInput("ggy", "Select y-axis",items),
          #selectInput("ggz", "Select z-axis",items),
-         checkboxInput("gg_logx","Log x-axis"),
          checkboxInput("gg_logy","Log y-axis"),
          selectInput("gg_facet", "Facet plot by:",c("NA",items))
        )
@@ -262,10 +262,13 @@ shinyServer(function(input, output,session) {
        fdf<-Data()
        items=names(fdf) #get numeric columns only
        tagList(
-          selectInput("gg_fill","Colour Fill by:",c("NA",items)),
-          selectInput("gg_colour","Colour points by:",c("NA",items)),
-          selectInput("gg_man_colour","Solid colour:",c("NA","firebrick","forest green","dodger blue")),
-          selectInput("gg_man_fill","Solid fill:",c("NA","firebrick","forest green","dodger blue"))
+          selectInput("gg_fill","Colour fill by:",c("NA",items)),
+          selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
+          selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
+          selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
+          numericInput("gg_gradient.steps","Number of steps in gradient",10),
+          selectInput("gg_man_fill","Solid colour fill:",c("NA","firebrick","forest green","dodger blue")),
+          selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue"))
       )
      }
    })  
@@ -313,9 +316,17 @@ shinyServer(function(input, output,session) {
          conditionalPanel(condition="input.gg_geom == 'line'"
          ),
          conditionalPanel(condition="input.gg_geom == 'boxplot'",
-              checkboxInput("gg_outliers","Remove outliers from plot")
+              checkboxInput("gg_outliers","Include outliers in plot",T),
+              checkboxInput("gg_varwidth","Use variable width boxes",F),
+              selectInput("gg_cut_method","Group continuous x-axis by",c("number","interval","width")),
+              numericInput("gg_cut.n","Group number (n)",10),
+              helpText("number = n groups with approx. equal observations, interval = n groups of equal range, width = groups of width n")
          ),  
-         conditionalPanel(condition="input.gg_geom == 'violin'"         )
+         conditionalPanel(condition="input.gg_geom == 'violin'",
+                          selectInput("gg_cut_method","Group continuous x-axis by",c("number","interval","width")),
+                          numericInput("gg_cut.n","Group number (n)",10),
+                          helpText("number = n groups with approx. equal observations, interval = n groups of equal range, width = groups of width n")
+         )
        )
      }
    })
@@ -329,6 +340,7 @@ shinyServer(function(input, output,session) {
    ##ggplot
    output$ggplot <- renderPlot({ 
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     withProgress(message="Plotting...",value=0,{
      fdf<-Data()
      #fdf<-filter(input$filts)
      if(input$auto){
@@ -365,15 +377,17 @@ shinyServer(function(input, output,session) {
          ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                         geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
                         fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
-                        enable.plotly = input$gg_plotly,outliers=input$gg_outliers,
-                        xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill)    
-
+                        enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
+                        gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
+                        cut_method=input$gg_cut_method,cut.n=input$gg_cut.n)
      }  
+     })
    })
   
    ###duplicated for plotly (can this be simplified?)
    output$ggplotly <- renderPlotly({ 
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
+     withProgress(message="Plotting...",value=0,{
      fdf<-Data()
      #fdf<-filter(input$filts)
      if(input$auto){
@@ -410,10 +424,11 @@ shinyServer(function(input, output,session) {
        ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                       geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
                       fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
-                      enable.plotly = input$gg_plotly,outliers=input$gg_outliers,
-                      xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill)    
-       
-     }  
+                      enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
+                      gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
+                      cut_method=input$gg_cut_method,cut.n=input$gg_cut.n)
+     }
+     })
    })
    
   ##bin plot controls
