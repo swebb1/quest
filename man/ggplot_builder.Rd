@@ -4,10 +4,13 @@
 \alias{ggplot_builder}
 \title{ggplot_builder function}
 \usage{
-ggplot_builder(d, x, y, z, geom = "point", facet = NA, smooth = NA,
-  xlim = NA, ylim = NA, xrotate = 0, colour = NA, fill = NA,
-  bar.position = "stack", bins = 0, outliers = T, enable.plotly = F,
-  theme = "grey", logx = F, logy = F)
+ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
+  smooth = NA, xlim = NA, ylim = NA, xrotate = 0, colour = NA,
+  fill = NA, bar.position = "stack", binwidth = 0, bins = 0,
+  outliers = T, varwidth = F, enable.plotly = F, theme = "grey",
+  logx = F, logy = F, man_colour = NA, man_fill = NA,
+  gradient = "default", gradient.steps = 10, colourset = "default",
+  cut_method = "number", cut.n = 10)
 }
 \arguments{
 \item{d}{Table of data}
@@ -32,15 +35,33 @@ ggplot_builder(d, x, y, z, geom = "point", facet = NA, smooth = NA,
 
 \item{bar.position}{Position of bars in a bar plot (stack,dodge,fill)}
 
-\item{bins}{Number of bins to use in a binned plot (histogram)}
+\item{binwidth}{Size of binwidth in binned plots (histogram)}
+
+\item{bins}{Add a stat_bin with this number of bins}
 
 \item{outliers}{Set outliers=F to remove outliers from boxplot}
 
+\item{varwidth}{Set varwidth=T to plot boxplots with variable width based on dataset size}
+
 \item{enable.plotly}{convert to interactive Plotly plot}
+
+\item{theme}{Set ggplot theme (grey,bw,dark,light,void,linedraw,minimal,classsic)}
 
 \item{logx, logy}{Log the variable first. Defaults to F.}
 
-\item{smooth}{Add a smoothing line, options are lm,glm,gam,loess,rlm. Off by default.}
+\item{man_colour}{Select a solid colour}
+
+\item{man_fill}{Select a solid fill colour}
+
+\item{gradient}{Select gradient colour scheme (default,Matlab)}
+
+\item{gradient.steps}{Set outliers=F to remove outliers from boxplot}
+
+\item{colourset}{Select colour scheme (default,Set1,Set2,Set3,Spectral)}
+
+\item{cut_method}{Select method for binning continuous X axis in boxplots (number,interval,width see cut_interval etc.)}
+
+\item{cut.n}{Binning number applied to cut_method}
 }
 \description{
 This function builds a ggplot2 function to plot data

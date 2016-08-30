@@ -6,7 +6,7 @@
 \usage{
 tiler(t, x, xl = F, xs = 1, y, yl = F, ys = 1, z, zl = F, zs = 1,
   bin = 1, min = -5, max = 5, xrange = c(-100, 100), yrange = c(-100,
-  100), func = "median", col = cols, smooth = NA)
+  100), func = "median", col = NA, smooth = NA)
 }
 \arguments{
 \item{t}{Table of data}

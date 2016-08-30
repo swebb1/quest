@@ -18,6 +18,12 @@
 #' @param bins Add a stat_bin with this number of bins
 #' @param binwidth Size of binwidth in binned plots (histogram)
 #' @param outliers Set outliers=F to remove outliers from boxplot
+#' @param varwidth Set varwidth=T to plot boxplots with variable width based on dataset size
+#' @param gradient Select gradient colour scheme (default,Matlab)
+#' @param gradient.steps Set outliers=F to remove outliers from boxplot
+#' @param colourset Select colour scheme (default,Set1,Set2,Set3,Spectral)
+#' @param cut_method Select method for binning continuous X axis in boxplots (number,interval,width see cut_interval etc.)
+#' @param cut.n Binning number applied to cut_method
 #' @param enable.plotly convert to interactive Plotly plot
 #' @param theme Set ggplot theme (grey,bw,dark,light,void,linedraw,minimal,classsic)
 #' @keywords tile plots
