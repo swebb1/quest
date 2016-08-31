@@ -129,8 +129,10 @@ shinyServer(function(input, output,session) {
    if(is.null(input$file) & is.null(input$files)){return(NULL)}
    #fdf<-filter(input$filts)
    if(!input$freeze){
-    fdf<-Data()
-    items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+     isolate({
+       fdf<-Data()
+       items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+     }) 
     tagList(
       selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
     )
@@ -182,8 +184,10 @@ shinyServer(function(input, output,session) {
    if(is.null(input$file) & is.null(input$files)){return(NULL)}
    #fdf<-filter(input$filts)
    if(!input$freeze){
-     fdf<-Data()
-     items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+     isolate({
+       fdf<-Data()
+       items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+     })   
      tagList(
        selectInput("dx", "Column to plot",items),
        selectInput("dy", "Column to plot",items)
@@ -241,15 +245,19 @@ shinyServer(function(input, output,session) {
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
      #fdf<-filter(input$filts)
      if(!input$freeze){
-       fdf<-Data()
-       items=names(fdf) #get numeric columns only
+       isolate({
+        fdf<-Data()
+        items=names(fdf)
+       })
        tagList(
          selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin")),
          selectInput("ggx", "Select x-axis",items),
          checkboxInput("gg_logx","Log x-axis"),
-         selectInput("ggy", "Select y-axis",items),
+         #conditionalPanel(condition = "input.gg_geom == 'point' || input.gg_geom == 'line' || input.gg_geom == 'boxplot' || input.gg_geom == 'violin'",
+           selectInput("ggy", "Select y-axis",items),
+           checkboxInput("gg_logy","Log y-axis"),
+         #),
          #selectInput("ggz", "Select z-axis",items),
-         checkboxInput("gg_logy","Log y-axis"),
          selectInput("gg_facet", "Facet plot by:",c("NA",items))
        )
      }
@@ -259,8 +267,10 @@ shinyServer(function(input, output,session) {
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
      #fdf<-filter(input$filts)
      if(!input$freeze){
-       fdf<-Data()
-       items=names(fdf) #get numeric columns only
+       isolate({
+        fdf<-Data()
+        items=names(fdf)
+       })
        tagList(
           selectInput("gg_fill","Colour fill by:",c("NA",items)),
           selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
@@ -273,13 +283,15 @@ shinyServer(function(input, output,session) {
      }
    })  
    
-   ##ggplot controls
+   ##ggplot layout
    output$ggplot_plot <- renderUI({
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
      #fdf<-filter(input$filts)
      if(!input$freeze){
-       fdf<-Data()
-       items=names(fdf) #get numeric columns only
+       isolate({
+         fdf<-Data()
+         items=names(fdf)
+       })
        tagList(
          numericInput("gg_xrotate","Rotate X-axis labels",0),
          checkboxInput("gg_plotly","Activate Plotly"),
@@ -301,8 +313,10 @@ shinyServer(function(input, output,session) {
      if(is.null(input$file) & is.null(input$files)){return(NULL)}
      #fdf<-filter(input$filts)
      if(!input$freeze){
-       fdf<-Data()
-       items=names(fdf) #get numeric columns only
+       isolate({
+         fdf<-Data()
+         items=names(fdf)
+       })
        tagList(
          conditionalPanel(condition="input.gg_geom == 'histogram'",
               numericInput("gg_binwidth","Bin widths (0=default):",0)
@@ -379,7 +393,7 @@ shinyServer(function(input, output,session) {
                         fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
-                        cut_method=input$gg_cut_method,cut.n=input$gg_cut.n)
+                        cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
      }  
      })
    })
@@ -426,7 +440,7 @@ shinyServer(function(input, output,session) {
                       fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
                       enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                       gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
-                      cut_method=input$gg_cut_method,cut.n=input$gg_cut.n)
+                      cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
      }
      })
    })
@@ -436,8 +450,10 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
-      fdf<-Data()
-      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      isolate({
+        fdf<-Data()
+        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      })
       tagList(
         selectInput("bx", "Column to bin X-axis by",items), 
         selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
@@ -466,8 +482,10 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
-      fdf<-Data()
-      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      isolate({
+        fdf<-Data()
+        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+      })
       tagList(
         selectInput("tx", "X-axis",items), 
         numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
@@ -504,9 +522,11 @@ shinyServer(function(input, output,session) {
     if(is.null(input$file) & is.null(input$files)){return(NULL)}
     #fdf<-filter(input$filts)
     if(!input$freeze){
-      fdf<-Data()
-      items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-      rnames=names(fdf)
+      isolate({
+        fdf<-Data()
+        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
+        rnames=names(fdf)
+      })
       tagList(
         selectInput("hrows", "Column to use for row names:",rnames), 
         selectInput("hcols", "Columns to include in heatmap",items,multiple=T,selected = items[1:2])      )
@@ -522,7 +542,7 @@ shinyServer(function(input, output,session) {
     d3heatmap(m, scale = "none",k_row=input$hkrow,cexRow = 0.7,cexCol=0.7)
   })
   
-  # Download
+  # Download ###handlers????
   output$downloadData <- downloadHandler(
     filename = function() {input$tableName},
     content = function(file) {

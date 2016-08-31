@@ -1,6 +1,7 @@
 library(shiny)
 library(quest)
 library(ggplot2)
+library(plotly)
 library(reshape2)
 library(corrplot)
 library(RColorBrewer)

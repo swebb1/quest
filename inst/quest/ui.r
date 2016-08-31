@@ -16,6 +16,7 @@ shinyUI(dashboardPage(
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
         menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
         menuItem("Heatmaps",tabName="heatmap",icon=shiny::icon("th")),
+        menuItem("Settings",tabName="settings",icon=shiny::icon("cogs")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
         checkboxInput("freeze","Freeze inputs",value = F),
@@ -208,11 +209,19 @@ shinyUI(dashboardPage(
                )
              )
      ),
+     tabItem(tabName="settings",
+             fluidRow(
+               box(
+                   title="Settings",width = 12,status="primary",solidHeader=TRUE,
+                   numericInput("factorlim","Limit on factor levels to process in plots",50)
+               )
+             )
+     ),
      tabItem(tabName="help",
              fluidRow(
                box(
-                   title="Help",width = NULL,status="primary",solidHeader=TRUE,
-                   includeMarkdown("README.md")
+                 title="Help",width = 12,status="primary",solidHeader=TRUE,
+                 includeMarkdown("README.md")
                )
              )
      )
@@ -220,7 +229,7 @@ shinyUI(dashboardPage(
    fluidRow(
      box(
        title="R Code",width = 12,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
-       HTML('<textarea id="add" rows="6" cols="200"></textarea>'),
+       HTML('<textarea id="add" rows="6" cols="150"></textarea>'),
        helpText("See help tab for examples")
      )
    )

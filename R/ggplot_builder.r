@@ -26,7 +26,8 @@
 #' @param cut.n Binning number applied to cut_method
 #' @param enable.plotly convert to interactive Plotly plot
 #' @param theme Set ggplot theme (grey,bw,dark,light,void,linedraw,minimal,classsic)
-#' @keywords tile plots
+#' @param factorlim Set maximum levels allowed to use factors for plotting (default=50)
+#' @keywords ggplot wrapper builder
 #' @export
 #' @examples
 #' ggplot_builder()
@@ -36,10 +37,19 @@ ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,xlim=NA,y
                          fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,
                          gradient="default",gradient.steps=10,colourset="default",
-                         cut_method="number",cut.n=10){
+                         cut_method="number",cut.n=10,factorlim=50){
 library(plotly)
 library(colorRamps)
 library(ggplot2)
+
+###Avoid plotting with large factors
+for(i in c(facet,colour,fill,x)){
+  factor_limit(d,i,factorlim)
+}
+if(!geom %in% c("histogram","bar")){ ##Check Y variable if applicable
+  factor_limit(d,y,factorlim)
+}
+  
 ml<-matlab.like2(gradient.steps)
 
 a<-list()
@@ -70,7 +80,7 @@ if(geom=="line"){
 }
 else if(geom=="bar"){
   if(!is.factor(d[,x])){
-    return(NULL)
+    stop("bar requires discrete x variable")
   }  
   a$x<-x
   if(!is.na(fill)){
@@ -85,7 +95,7 @@ else if(geom=="bar"){
 }
 else if(geom=="histogram"){
   if(is.factor(d[,x])){
-    return(NULL)
+    stop("Histogram requires continuous x variable")
   }
   a$x<-x
   if(!is.na(fill)){
@@ -102,7 +112,7 @@ else if(geom=="histogram"){
 }
 else if(geom=="boxplot"){
   if(!is.numeric(d[,y])){
-    return(NULL)
+    stop("Boxplot requires continuous y variable")
   }
   a$x<-x
   a$y<-y
@@ -133,7 +143,7 @@ else if(geom=="boxplot"){
 }
 else if(geom=="violin"){
   if(!is.numeric(d[,y])){
-    return(NULL)
+    stop("Violin requires continuous y variable")
   }
   a$x<-x
   a$y<-y
@@ -158,14 +168,18 @@ else if(geom=="violin"){
 }
 p<-ggplot(d,as)+geo
 if(!is.na(facet)){
-  p<-p+facet_wrap(c(facet))
+  if(is.factor(d[,facet])&length(levels(d[,facet]))<=factorlim){
+    p<-p+facet_wrap(c(facet))
+  }
+  else{
+    stop(paste("You must facet by a factor variable with <=",factorlim,"levels"))
+  }  
 }
 if(!is.na(smooth) & geom %in% c("point")){
   s<-list()
   if(!is.na(fill)){
     s$fill<-fill
   }
-
   if(!is.na(colour)){
     s$colour<-colour
   }
