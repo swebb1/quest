@@ -272,7 +272,9 @@ shinyServer(function(input, output,session) {
            checkboxInput("gg_logy","Log y-axis"),
          #),
          #selectInput("ggz", "Select z-axis",items),
-         selectInput("gg_facet", "Facet plot by:",c("NA",items))
+         selectInput("gg_facet", "Facet plot by:",c("NA",items)),
+         textInput("ggplotName","Save as:","Quest_plot"),
+         downloadButton('downloadggplot', 'Save plot as pdf')
        )
      }
    })  
@@ -347,7 +349,8 @@ shinyServer(function(input, output,session) {
               )
          ),
          conditionalPanel(condition="input.gg_geom == 'point'",
-              selectInput("gg_smooth","Add a smoothing line to points",c("NA","auto","gam","lm","glm","rlm","loess"))
+              selectInput("gg_smooth","Add a smoothing line to points",c("NA","auto","gam","lm","glm","rlm","loess")),
+              checkboxInput("gg_smooth.se","Include standard error",T)
          ),
          conditionalPanel(condition="input.gg_geom == 'line'"
          ),
@@ -367,14 +370,13 @@ shinyServer(function(input, output,session) {
      }
    })
    
-   #Do not disactivate tabs
+   #Do not inactivate tabs
    outputOptions(output, 'ggplot_cols', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_colours', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
    
-   ##ggplot
-   output$ggplot <- renderPlot({ 
+   plot_gg<-reactive({
      if(is.null(Data())){return(NULL)}
      withProgress(message="Plotting...",value=0,{
      fdf<-Data()
@@ -410,8 +412,8 @@ shinyServer(function(input, output,session) {
        if(input$gg_facet != "NA"){
          facet = input$gg_facet
        }
-         ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
-                        geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
+       ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+                        geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
                         fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
@@ -420,53 +422,14 @@ shinyServer(function(input, output,session) {
      }  
      })
    })
-  
-   ###duplicated for plotly (can this be simplified?)
-   output$ggplotly <- renderPlotly({ 
-     if(is.null(Data())){return(NULL)}
-     withProgress(message="Plotting...",value=0,{
-     fdf<-Data()
-     #fdf<-filter(input$filts)
-     if(input$auto){
-       xlim=NA
-       ylim=NA
-       if(input$gg_manual==T){
-         xlim<-c(input$gg_xmin,input$gg_xmax)
-         ylim<-c(input$gg_ymin,input$gg_ymax)
-       }
-       fill=NA
-       colour=NA
-       man_fill=NA
-       man_colour=NA
-       facet=NA
-       smooth=NA
-       if(input$gg_fill != "NA"){
-         fill = input$gg_fill
-       }
-       if(input$gg_colour != "NA"){
-         colour = input$gg_colour
-       }
-       if(input$gg_man_fill != "NA"){
-         man_fill = input$gg_man_fill
-       }
-       if(input$gg_man_colour != "NA"){
-         man_colour = input$gg_man_colour
-       }
-       if(input$gg_smooth != "NA"){
-         smooth = input$gg_smooth
-       }
-       if(input$gg_facet != "NA"){
-         facet = input$gg_facet
-       }
-       ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
-                      geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
-                      fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
-                      stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
-                      enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
-                      gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
-                      cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
-     }
-     })
+   
+   ##ggplot
+   output$ggplot <- renderPlot({ 
+      plot_gg()
+   })
+   
+   output$ggplotly <- renderPlotly({
+     plot_gg()
    })
    
   ##bin plot controls
@@ -576,17 +539,13 @@ shinyServer(function(input, output,session) {
       write.table(fdf, file,sep="\t",quote=F,row.names=F)
     }
   )
-
-##Add plot save button on each panel for pdf, different for ggplot and others,
-##May need to convert all plots to ggplot
-#  output$downloadPlot <- downloadHandler(
-#    filename = function() {input$tableName},
-#    content = function(file) {
-#      fdf<-filter(input$filts)
-#      fdf<-fdf[, input$show_vars, drop = FALSE]
-#      write.table(fdf, file,sep="\t",quote=F,row.names=F)
-#    }
-#  )
+  
+  output$downloadggplot <- downloadHandler(
+    filename = function() {paste0(input$ggplotName,".pdf")},
+    content = function(file) {
+      ggsave(file, plot = plot_gg(), device = "pdf")
+    }
+  )
 
  
 }

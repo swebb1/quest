@@ -36,7 +36,7 @@
 #' ggplot_builder()
 
 
-ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,xlim=NA,ylim=NA,xrotate=0,colour=NA,
+ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
                          fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,
                          gradient="default",gradient.steps=10,colourset="default",coord_flip=F,
@@ -197,6 +197,9 @@ if(!is.na(smooth) & geom %in% c("point")){
   }
   if(!is.na(colour)){
     s$colour<-colour
+  }
+  if(smooth.se==F){
+    s$se<-F
   }
   statas<-do.call(aes_string,s)
   p<-p+stat_smooth(method=smooth,statas)
