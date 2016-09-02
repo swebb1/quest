@@ -10,7 +10,8 @@ ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
   outliers = T, varwidth = F, enable.plotly = F, theme = "grey",
   logx = F, logy = F, man_colour = NA, man_fill = NA,
   gradient = "default", gradient.steps = 10, colourset = "default",
-  cut_method = "number", cut.n = 10)
+  coord_flip = F, cut_method = "number", cut.n = 10, factorlim = 50,
+  stat.method = "count", stat.func = "mean")
 }
 \arguments{
 \item{d}{Table of data}
@@ -59,9 +60,17 @@ ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
 
 \item{colourset}{Select colour scheme (default,Set1,Set2,Set3,Spectral)}
 
+\item{coord_flip}{Flip the x and y axes (default=F)}
+
 \item{cut_method}{Select method for binning continuous X axis in boxplots (number,interval,width see cut_interval etc.)}
 
 \item{cut.n}{Binning number applied to cut_method}
+
+\item{factorlim}{Set maximum levels allowed to use factors for plotting (default=50)}
+
+\item{stat.method}{Set stat method for barplots (count,identity,summary) (default=bin)}
+
+\item{stat.func}{Set summary function for stat.method="summary" (default=mean)}
 }
 \description{
 This function builds a ggplot2 function to plot data
@@ -69,6 +78,7 @@ This function builds a ggplot2 function to plot data
 \examples{
 ggplot_builder()
 }
-\keyword{plots}
-\keyword{tile}
+\keyword{builder}
+\keyword{ggplot}
+\keyword{wrapper}
 

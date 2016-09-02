@@ -27,6 +27,9 @@
 #' @param enable.plotly convert to interactive Plotly plot
 #' @param theme Set ggplot theme (grey,bw,dark,light,void,linedraw,minimal,classsic)
 #' @param factorlim Set maximum levels allowed to use factors for plotting (default=50)
+#' @param stat.method Set stat method for barplots (count,identity,summary) (default=bin)
+#' @param stat.func Set summary function for stat.method="summary" (default=mean)
+#' @param coord_flip Flip the x and y axes (default=F)
 #' @keywords ggplot wrapper builder
 #' @export
 #' @examples
@@ -36,8 +39,8 @@
 ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,xlim=NA,ylim=NA,xrotate=0,colour=NA,
                          fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,
-                         gradient="default",gradient.steps=10,colourset="default",
-                         cut_method="number",cut.n=10,factorlim=50){
+                         gradient="default",gradient.steps=10,colourset="default",coord_flip=F,
+                         cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean"){
 library(plotly)
 library(colorRamps)
 library(ggplot2)
@@ -46,7 +49,7 @@ library(ggplot2)
 for(i in c(facet,colour,fill,x)){
   factor_limit(d,i,factorlim)
 }
-if(!geom %in% c("histogram","bar")){ ##Check Y variable if applicable
+if(!geom %in% c("histogram","bar") | (geom=="bar" & stat.method!="count")){ ##Check Y variable if applicable
   factor_limit(d,y,factorlim)
 }
   
@@ -83,12 +86,21 @@ else if(geom=="bar"){
     stop("bar requires discrete x variable")
   }  
   a$x<-x
+  if(stat.method!="count"){
+    a$y<-y ##map a y aesthetic if using stat identity or summary
+  }
   if(!is.na(fill)){
     a$fill<-fill
   }
   g$position<-bar.position
   if(!is.na(man_fill)){
     g$fill<-man_fill
+  }
+  if(!is.na(stat.method)){
+    g$stat<-stat.method
+  }
+  if(stat.method=="summary"){
+    g$fun.y<-stat.func
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_bar,g)
@@ -106,6 +118,9 @@ else if(geom=="histogram"){
   }
   if(binwidth>0){
     g$binwidth<-binwidth
+  }
+  if(bins>0){
+    g$bins<-bins
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_histogram,g)
@@ -186,9 +201,6 @@ if(!is.na(smooth) & geom %in% c("point")){
   statas<-do.call(aes_string,s)
   p<-p+stat_smooth(method=smooth,statas)
 }
-if(bins>0 & geom %in% c("histogram","bar") & is.numeric(d[,x])) {
-  p<-p+stat_bin(bins=bins)
-}
 if(!is.na(xlim) & is.numeric(d[,x])){
   p<-p+xlim(xlim)
 }
@@ -219,12 +231,33 @@ p<-switch(theme,grey=p+theme_grey(),dark=p+theme_dark(),light=p+theme_light(),li
 if(xrotate!=0){
   p<-p+theme(axis.text.x=element_text(angle=xrotate,hjust=1,vjust=0.5))
 }
-p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml)+scale_colour_gradientn(colours=ml))
-p<-switch(colourset,default=p,Set1=p+scale_colour_brewer(palette="Set1")+scale_fill_brewer(palette="Set1"),
-          Set2=p+scale_colour_brewer(palette="Set2")+scale_fill_brewer(palette="Set2"),
-          Set3=p+scale_colour_brewer(palette="Set3")+scale_fill_brewer(palette="Set3"),
-          Spectral=p+scale_colour_brewer(palette="Spectral")+scale_fill_brewer(palette="Spectral"))
 
+##set colour scales
+if(!is.na(colour)){
+  if(is.factor(d[,colour])){
+    p<-switch(colourset,default=p,Set1=p+scale_colour_brewer(palette="Set1"),
+              Set2=p+scale_colour_brewer(palette="Set2"),
+              Set3=p+scale_colour_brewer(palette="Set3"),
+              Spectral=p+scale_colour_brewer(palette="Spectral"))
+  }
+  else{
+    p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml))
+  }
+}
+if(!is.na(fill)){
+  if(is.factor(d[,fill])){
+    p<-switch(colourset,default=p,Set1=p+scale_fill_brewer(palette="Set1"),
+              Set2=p+scale_fill_brewer(palette="Set2"),
+              Set3=p+scale_fill_brewer(palette="Set3"),
+              Spectral=p+scale_fill_brewer(palette="Spectral"))
+  }
+  else{
+    p<-switch(gradient,default=p,Matlab=p+scale_fill_gradientn(colours=ml))
+  }
+}
+if(coord_flip){
+  p<-p+coord_flip()
+}
 #p<-p + scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 if(enable.plotly){
   return(ggplotly(p))

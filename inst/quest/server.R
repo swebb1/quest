@@ -303,7 +303,8 @@ shinyServer(function(input, output,session) {
            numericInput("gg_xmax","X-axis maximum",NULL),
            numericInput("gg_ymin","Y-axis minimum",NULL),
            numericInput("gg_ymax","Y-axis maximum",NULL)
-         )
+         ),
+         checkboxInput("gg_coord_flip","Flip axes:",F)
        )
      }
    })
@@ -319,10 +320,17 @@ shinyServer(function(input, output,session) {
        })
        tagList(
          conditionalPanel(condition="input.gg_geom == 'histogram'",
-              numericInput("gg_binwidth","Bin widths (0=default):",0)
+              numericInput("gg_bins","Number of bins (0=default):",0),
+              numericInput("gg_binwidth","Bin widths (0=default):",0),
+              helpText("Manually setting bin widths overwrites number of bins")
+              
          ),
          conditionalPanel(condition="input.gg_geom == 'bar'",
-              selectInput("gg_bar.position","Bar positioning",c("stack","dodge","fill"))
+              selectInput("gg_bar.position","Bar positioning",c("stack","dodge","fill")),
+              selectInput("gg_stat_method","Statistic for y-values",c("count","identity","summary")),
+              conditionalPanel(condition="input.gg_stat_method == 'summary'",
+                    selectInput("gg_stat.func","Summary method",c("mean","median","sum"))
+              )
          ),
          conditionalPanel(condition="input.gg_geom == 'point'",
               selectInput("gg_smooth","Add a smoothing line to points",c("NA","auto","gam","lm","glm","rlm","loess"))
@@ -390,7 +398,8 @@ shinyServer(function(input, output,session) {
        }
          ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                         geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
-                        fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
+                        fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
+                        stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
                         cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
@@ -437,7 +446,8 @@ shinyServer(function(input, output,session) {
        }
        ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                       geom=input$gg_geom,smooth=smooth,xrotate=input$gg_xrotate,colour=colour,
-                      fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,theme = input$gg_theme,
+                      fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
+                      stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                       enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                       gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
                       cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
