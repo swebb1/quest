@@ -34,18 +34,22 @@ shinyUI(dashboardPage(
                  box(
                    title="Load from your computer",width = 12,status="primary",solidHeader=TRUE,
                    #htmlOutput("fileUI"),
-                   selectInput("inputType","Input file location:",choices=c("Upload","Server")),
+                   selectInput("inputType","Input file location:",choices=c("Upload","Server","Environment")),
                    conditionalPanel(
                      condition = "input.inputType == 'Upload'",
                      fileInput("file", "Input File",multiple = FALSE) ##May add upload file option)
                    ),
                    conditionalPanel(
                      condition = "input.inputType == 'Server'",
-                     textInput("dir","Select file directory:",value="/homes/swebb/interactive_plotting/Odyssey/test_data"),
+                     textInput("dir","Select file directory:",value=getwd()),
                      checkboxInput("recursive", "Search directory recursively", FALSE),
                      textInput("pattern","Search pattern","",placeholder="*.tab"),
                      actionButton("list_dir","List",icon = shiny::icon("folder-open")),
                      uiOutput("inFiles")
+                   ),
+                   conditionalPanel(
+                     condition = "input.inputType == 'Environment'",
+                     uiOutput("inObjects")
                    ),
                    #checkboxInput("show", "Show columns", FALSE),
                    #checkboxInput('show_all', 'All/None', TRUE),
