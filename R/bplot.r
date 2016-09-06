@@ -34,7 +34,7 @@ bplot<-function(t,x,y,ys=1,ystep=0,ylab="",axis3="NA",w=400,s=80,f="mean",
     t<-t[!is.na(t[,y[i]]),] 
     #scale the y-axes
     if(ys!=1){
-      t<-t*ys
+      t[,y[i]]<-t[,y[i]]*ys
     }
   }
   xb<-t[,x] #get binning column

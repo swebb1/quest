@@ -5,10 +5,10 @@
 \title{ggplot_builder function}
 \usage{
 ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
-  smooth = NA, xlim = NA, ylim = NA, xrotate = 0, colour = NA,
-  fill = NA, bar.position = "stack", binwidth = 0, bins = 0,
-  outliers = T, varwidth = F, enable.plotly = F, theme = "grey",
-  logx = F, logy = F, man_colour = NA, man_fill = NA,
+  smooth = NA, smooth.se = T, xlim = NA, ylim = NA, xrotate = 0,
+  colour = NA, fill = NA, bar.position = "stack", binwidth = 0,
+  bins = 0, outliers = T, varwidth = F, enable.plotly = F,
+  theme = "grey", logx = F, logy = F, man_colour = NA, man_fill = NA,
   gradient = "default", gradient.steps = 10, colourset = "default",
   coord_flip = F, cut_method = "number", cut.n = 10, factorlim = 50,
   stat.method = "count", stat.func = "mean")

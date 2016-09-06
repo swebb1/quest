@@ -146,6 +146,7 @@ shinyUI(dashboardPage(
                ),
                box(
                  title="Controls",width = 4,status="success",solidHeader=TRUE,
+                 div(style = 'overflow-y: scroll', 
                  wellPanel(p(strong("Data")), 
                            uiOutput("bin_cols")
                  ),
@@ -161,6 +162,7 @@ shinyUI(dashboardPage(
                            numericInput("bystep","Y axis step size",0,min=0),
                            textInput("bylab","Y axis label",""),
                            textInput("bfeature","Name of features","data points")
+                 )
                  )
                  )
              )
