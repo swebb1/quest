@@ -495,10 +495,22 @@ shinyServer(function(input, output,session) {
     }
     fdf<-Data()
     #fdf<-filter(input$filts)
+    txrange=NA
+    tyrange=NA
+    tzrange=NA
+    if(input$txman){
+      txrange=c(input$txmin,input$txmax)
+    }
+    if(input$tyman){
+      tyrange=c(input$tymin,input$tymax)
+    }
+    if(input$tzman){
+      tzrange=c(input$tzmin,input$tzmax)
+    }
     if(input$auto){
       tiler(t=fdf,x=input$tx,xl=input$tlogx,xs=input$txs,y=input$ty,yl=input$tlogy,ys=input$tys,
-            z=input$tz,zl=input$tlogz,zs=input$tzs,bin=input$bins,min=input$tmin,max=input$tmax,
-            xrange=c(input$txmin,input$txmax),yrange=c(input$tymin,input$tymax),
+            z=input$tz,zl=input$tlogz,zs=input$tzs,bin=input$bins,zrange=tzrange,
+            xrange=txrange,yrange=tyrange,
             func=input$tsummary)  
     }  
   })

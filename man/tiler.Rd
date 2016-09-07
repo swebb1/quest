@@ -5,8 +5,8 @@
 \title{tiler function}
 \usage{
 tiler(t, x, xl = F, xs = 1, y, yl = F, ys = 1, z, zl = F, zs = 1,
-  bin = 1, min = -5, max = 5, xrange = c(-100, 100), yrange = c(-100,
-  100), func = "median", col = NA, smooth = NA)
+  bin = 1, zrange = NA, xrange = NA, yrange = NA, func = "median",
+  col = NA, smooth = NA)
 }
 \arguments{
 \item{t}{Table of data}
@@ -19,11 +19,11 @@ tiler(t, x, xl = F, xs = 1, y, yl = F, ys = 1, z, zl = F, zs = 1,
 
 \item{bin}{Size of each tile}
 
-\item{min, max}{Range of the colour scale. Defaults to -5 to 5}
+\item{zrange}{Range of the colour scale.}
 
-\item{xrange}{Range displayed on x-axis. Defaults to c(-100,100)}
+\item{xrange}{Range displayed on x-axis.}
 
-\item{yrange}{Range displayed on y-axis. Defaults to c(-100,100)}
+\item{yrange}{Range displayed on y-axis.}
 
 \item{func}{Function applied to tiled z variables ("median","mean","sum","count"). Defaults to median.}
 

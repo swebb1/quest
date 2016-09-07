@@ -185,13 +185,22 @@ shinyUI(dashboardPage(
                  title="Controls",width = 12,status="success",solidHeader=TRUE,
                  wellPanel(p(strong("Controls")),style = 'overflow-y: scroll; max-height: 400px',
                            numericInput("bins","Bins",1,min=1,max=1000),
-                           numericInput("tmin","Minimum colour scale",0),
-                           numericInput("tmax","Maximum colour scale",1),
-                           numericInput("txmin","Minimum x-axis value",0),
-                           numericInput("txmax","Maximum x-axis value",100),
-                           numericInput("tymin","Minimum y-axis value",0),
-                           numericInput("tymax","Maximum y-axis value",100),
-                           selectInput("tsummary","Operation",choices=c("mean","median","sum","count"))                                   
+                           selectInput("tsummary","Operation",choices=c("mean","median","sum","count")),                                   
+                           checkboxInput("tzman","Manually alter colour scale",F),
+                           conditionalPanel("input.tzman == true",
+                             numericInput("tzmin","Minimum colour scale",0),
+                             numericInput("tzmax","Maximum colour scale",0)
+                           ),
+                           checkboxInput("txman","Manually alter X scale",F),
+                           conditionalPanel("input.tzman == true",
+                             numericInput("txmin","Minimum x-axis value",0),
+                             numericInput("txmax","Maximum x-axis value",0)
+                           ),
+                           checkboxInput("tyman","Manually alter Y scale",F),
+                           conditionalPanel("input.tzman == true",                                                    
+                            numericInput("tymin","Minimum y-axis value",0),
+                            numericInput("tymax","Maximum y-axis value",0)
+                           )
                  )
                )
              )
