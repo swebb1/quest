@@ -192,12 +192,12 @@ shinyUI(dashboardPage(
                              numericInput("tzmax","Maximum colour scale",0)
                            ),
                            checkboxInput("txman","Manually alter X scale",F),
-                           conditionalPanel("input.tzman == true",
+                           conditionalPanel("input.txman == true",
                              numericInput("txmin","Minimum x-axis value",0),
                              numericInput("txmax","Maximum x-axis value",0)
                            ),
                            checkboxInput("tyman","Manually alter Y scale",F),
-                           conditionalPanel("input.tzman == true",                                                    
+                           conditionalPanel("input.tyman == true",                                                    
                             numericInput("tymin","Minimum y-axis value",0),
                             numericInput("tymax","Maximum y-axis value",0)
                            )
