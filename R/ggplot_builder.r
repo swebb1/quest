@@ -98,7 +98,12 @@ if(geom=="tile"){
   geo<-do.call(geom_tile,g)
   ##BigVis data
   if(condense){
-    tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y),z = d[,fill],summary = condense.func)
+    if(!is.na(fill)){
+      tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y),z = d[,fill],summary = condense.func)
+    }
+    else{
+      tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y))
+    }
     if(condense.func=="mean"){
       tab<-tab[,-3]
     }
