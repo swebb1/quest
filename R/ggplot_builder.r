@@ -20,7 +20,8 @@
 #' @param outliers Set outliers=F to remove outliers from boxplot
 #' @param varwidth Set varwidth=T to plot boxplots with variable width based on dataset size
 #' @param gradient Select gradient colour scheme (default,Matlab)
-#' @param gradient.steps Set outliers=F to remove outliers from boxplot
+#' @param gradient.steps Set number of shades in gradient
+#' @param gradient.range Set range of values covered by gradient
 #' @param colourset Select colour scheme (default,Set1,Set2,Set3,Spectral)
 #' @param cut_method Select method for binning continuous X axis in boxplots (number,interval,width see cut_interval etc.)
 #' @param cut.n Binning number applied to cut_method
@@ -30,20 +31,28 @@
 #' @param stat.method Set stat method for barplots (count,identity,summary) (default=bin)
 #' @param stat.func Set summary function for stat.method="summary" (default=mean)
 #' @param coord_flip Flip the x and y axes (default=F)
+#' @param tile_height Set height of tile for geom_tile
+#' @param tile_width Set width of tile for geom_tile
+#' @param condense Use bigvis package to summarise overlapping points in large datasets
+#' @param condense.func Function used to condense (mean,median,sum,count)
+#' @param condense.x Size of bin to use on X axis to find overlapping points
+#' @param condense.y Size of bin to use on Y axis to find overlapping points
 #' @keywords ggplot wrapper builder
 #' @export
 #' @examples
 #' ggplot_builder()
 
 
-ggplot_builder<-function(d,x,y=NA,z=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
+ggplot_builder<-function(d,x,y=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
                          fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
-                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,
-                         gradient="default",gradient.steps=10,colourset="default",coord_flip=F,
-                         cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean"){
+                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,tile_height=NA,tile_width=NA,
+                         gradient="default",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
+                         cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
+                         condense=F,condense.func="mean",condense.x=10,condense.y=10){
 library(plotly)
 library(colorRamps)
 library(ggplot2)
+library(bigvis)
 
 ###Avoid plotting with large factors
 for(i in c(facet,colour,fill,x)){
@@ -52,9 +61,10 @@ for(i in c(facet,colour,fill,x)){
 if(!geom %in% c("histogram","bar") | (geom=="bar" & stat.method!="count")){ ##Check Y variable if applicable
   factor_limit(d,y,factorlim)
 }
-  
+
 ml<-matlab.like2(gradient.steps)
 
+###build plot
 a<-list()
 g<-list()
 if(geom=="point"){
@@ -68,6 +78,34 @@ if(geom=="point"){
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_point,g)
+}
+if(geom=="tile"){
+  a$x<-x
+  a$y<-y
+  if(!is.na(fill)){
+    a$fill<-fill
+  }
+  if(!is.na(man_fill)){
+    g$fill<-man_fill
+  }
+  if(!is.na(tile_width)){
+    g$width<-tile_width
+  }
+  if(!is.na(tile_height)){
+    g$height<-tile_height
+  }
+  as<-do.call(aes_string,a)
+  geo<-do.call(geom_tile,g)
+  ##BigVis data
+  if(condense){
+    tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y),z = d[,fill],summary = condense.func)
+    if(condense.func=="mean"){
+      tab<-tab[,-3]
+    }
+    names(tab)<-c(x,y,fill)
+    #if(func=="count" & gradient.log){tab[,paste0(fill,".",tile_bin.func)]<-log(tab[,paste0(fill,".",tile_bin.func)])}
+    d<-tab
+  }
 }
 if(geom=="line"){
   a$x<-x
@@ -244,7 +282,12 @@ if(!is.na(colour)){
               Spectral=p+scale_colour_brewer(palette="Spectral"))
   }
   else{
-    p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml))
+    if(!is.na(gradient.range)){
+      p<-switch(gradient,default=p+scale_colour_gradient(limits=gradient.range,oob = scales::squish,space="Lab"),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml))
+    }
+    else{
+      p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml))
+    }
   }
 }
 if(!is.na(fill)){
@@ -255,8 +298,12 @@ if(!is.na(fill)){
               Spectral=p+scale_fill_brewer(palette="Spectral"))
   }
   else{
-    p<-switch(gradient,default=p,Matlab=p+scale_fill_gradientn(colours=ml))
-  }
+    if(!is.na(gradient.range)){
+      p<-switch(gradient,default=p+scale_fill_gradient(limits=gradient.range,oob = scales::squish,space="Lab"),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml))
+    }
+    else{
+      p<-switch(gradient,default=p,Matlab=p+scale_fill_gradientn(colours=ml))
+    }  }
 }
 if(coord_flip){
   p<-p+coord_flip()

@@ -228,14 +228,11 @@ shinyServer(function(input, output,session) {
         items=names(fdf)
        })
        tagList(
-         selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin")),
+         selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin","tile")),
          selectInput("ggx", "Select x-axis",items),
-         checkboxInput("gg_logx","Log x-axis"),
-         #conditionalPanel(condition = "input.gg_geom == 'point' || input.gg_geom == 'line' || input.gg_geom == 'boxplot' || input.gg_geom == 'violin'",
-           selectInput("ggy", "Select y-axis",items),
-           checkboxInput("gg_logy","Log y-axis"),
-         #),
-         #selectInput("ggz", "Select z-axis",items),
+         checkboxInput("gg_logx","Log x-axis",F),
+         selectInput("ggy", "Select y-axis",items),
+         checkboxInput("gg_logy","Log y-axis",F),
          selectInput("gg_facet", "Facet plot by:",c("NA",items)),
          textInput("ggplotName","Save as:","Quest_plot"),
          downloadButton('downloadggplot', 'Save plot as pdf')
@@ -257,6 +254,12 @@ shinyServer(function(input, output,session) {
           selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
           selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
           numericInput("gg_gradient.steps","Number of steps in gradient",10),
+          checkboxInput("gg_grad_manual","Set gradient range manually:",F),
+          conditionalPanel(
+            condition = "input.gg_grad_manual == true",
+            numericInput("gg_gradient.min","Minimum gradient value",NULL),
+            numericInput("gg_gradient.max","Maximum gradient value",NULL)
+          ),
           selectInput("gg_man_fill","Solid colour fill:",c("NA","firebrick","forest green","dodger blue")),
           selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue"))
       )
@@ -329,6 +332,20 @@ shinyServer(function(input, output,session) {
                           selectInput("gg_cut_method","Group continuous x-axis by",c("number","interval","width")),
                           numericInput("gg_cut.n","Group number (n)",10),
                           helpText("number = n groups with approx. equal observations, interval = n groups of equal range, width = groups of width n")
+         ),
+         conditionalPanel(condition="input.gg_geom == 'tile'",
+              checkboxInput("gg_condense","Summarise overlaps",F),
+              conditionalPanel(condition = "input.gg_condense == true",
+                          selectInput("gg_condense_func", "Summary function",c("mean","median","sum","count")),
+                          numericInput("gg_condense.x","Size of X bin",10),
+                          numericInput("gg_condense.y","Size of Y bin",10)
+              ),
+              checkboxInput("gg_tile_manual","Set tile dimensions manually:",F),
+              conditionalPanel(
+              condition = "input.gg_tile_manual == true",
+                      numericInput("gg_tile_height","Tile height",NULL),
+                      numericInput("gg_tile_width","Tile width",NULL)
+              )
          )
        )
      }
@@ -348,9 +365,23 @@ shinyServer(function(input, output,session) {
      if(input$auto){
        xlim=NA
        ylim=NA
+       zlim=NA
+       tile_width=NA
+       tile_height=NA
        if(input$gg_manual==T){
         xlim<-c(input$gg_xmin,input$gg_xmax)
         ylim<-c(input$gg_ymin,input$gg_ymax)
+       }
+       if(input$gg_manual==T){
+         xlim<-c(input$gg_xmin,input$gg_xmax)
+         ylim<-c(input$gg_ymin,input$gg_ymax)
+       }
+       if(input$gg_grad_manual==T){
+         zlim<-c(input$gg_gradient.min,input$gg_gradient.max)
+       }
+       if(input$gg_tile_manual==T){
+         tile_height<-input$gg_tile_height
+         tile_width<-input$gg_tile_width
        }
        fill=NA
        colour=NA
@@ -376,13 +407,15 @@ shinyServer(function(input, output,session) {
        if(input$gg_facet != "NA"){
          facet = input$gg_facet
        }
-       ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,z=input$ggz,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+       p<-ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                         geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
                         fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
-                        cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim)
+                        cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim,tile_width=tile_width,tile_height=tile_height,
+                        gradient.range=zlim,condense=input$gg_condense,condense.x = input$gg_condense.x,condense.y = input$gg_condense.y,condense.func = input$gg_condense_func)
+       return(p)
      }  
      })
    })
