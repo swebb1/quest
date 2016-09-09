@@ -41,7 +41,7 @@ shinyUI(dashboardPage(
                    ),
                    conditionalPanel(
                      condition = "input.inputType == 'Server'",
-                     textInput("dir","Select file directory:",value=getwd()),
+                     textInput("dir","Select file directory:",value=ifelse(exists("wd"),wd,"")), ##maybe a bad hack to set wd as getwd() during runQuest call
                      checkboxInput("recursive", "Search directory recursively", FALSE),
                      textInput("pattern","Search pattern","",placeholder="*.tab"),
                      actionButton("list_dir","List",icon = shiny::icon("folder-open")),
@@ -51,12 +51,6 @@ shinyUI(dashboardPage(
                      condition = "input.inputType == 'Environment'",
                      uiOutput("inObjects")
                    ),
-                   #checkboxInput("show", "Show columns", FALSE),
-                   #checkboxInput('show_all', 'All/None', TRUE),
-                   #conditionalPanel(
-                   #condition = "input.show == true",
-                    #uiOutput("show_cols")
-                   #),
                    checkboxInput("header", "File has column headers", TRUE)
                  ),
                  box(

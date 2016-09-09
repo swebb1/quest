@@ -43,6 +43,7 @@ shinyServer(function(input, output,session) {
   Data<-reactive({
     if(is.null(input$file) & is.null(input$files) & is.null(input$object)){
       df<-test
+      return(df)
     }
     else if(input$inputType=="Upload"){
       inFile<-input$file
@@ -97,47 +98,10 @@ shinyServer(function(input, output,session) {
   ##output table
   output$table = renderDataTable({
     fdf<-Data()
-    #fdf<-filter(input$filts)
-    fdfc<-fdf[, input$show_vars, drop = FALSE]  ##show selected columns
-    if(dim(fdfc)[2]==0){ ##If no columns selected show full table. Needs Fixing!!!!
-      return(fdf)
-    }
-    else{
-      return(fdfc)
-    }
+    return(fdf)
   },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 5)
   )
   
-  ##table controls
-  #output$show_cols<-renderUI({
-  #  if(is.null(input$file)){return(NULL)}
-  #  fdf<-filter(input$add)
-  #  fdf<-Data()
-  #  items=names(fdf)
-  #  tagList(
-  #    checkboxGroupInput('show_vars', 'Columns to show:', items, selected = items)
-  #  )
-  #})
-  #outputOptions(output, 'show_cols', suspendWhenHidden=FALSE)
-  
-  ##Observe check box input for select/deselect all columns
-  observe({
-    if(is.null(input$file)){return(NULL)}
-    fdf<-Data()
-   # if (input$show_all){
-    #    updateCheckboxGroupInput(
-    #      session, 'show_vars','Columns to show:', choices = names(fdf),
-    #      selected = names(fdf)
-    #    )
-  #  }
-  #  else{
-  #      updateCheckboxGroupInput(
-  #        session, 'show_vars','Columns to show:', choices = names(fdf),
-  #        selected = NULL
-  #      )
-  #  }  
-  })
-
  ##1d plot controls
  output$plot_cols <- renderUI({
    if(is.null(Data())){return(NULL)}
@@ -546,8 +510,6 @@ shinyServer(function(input, output,session) {
     filename = function() {input$tableName},
     content = function(file) {
       fdf<-Data()
-      #fdf<-filter(input$filts)
-      #fdf<-fdf[, input$show_vars, drop = FALSE]
       write.table(fdf, file,sep="\t",quote=F,row.names=F)
     }
   )
