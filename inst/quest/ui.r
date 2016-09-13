@@ -65,7 +65,18 @@ shinyUI(dashboardPage(
                  title = "Data Table", width = 12, status = "primary",solidHeader=TRUE,
                  div(style = 'overflow-x: scroll', dataTableOutput('table'))
                )
-             )
+             ),
+             fluidRow(
+               box(
+                 title = "Data Summary", width = 6, status = "primary",solidHeader=TRUE,
+                 uiOutput('summarycols'),
+                 verbatimTextOutput('tablesum')
+               ),
+               box(
+                 title = "Column names", width = 6, status = "primary",solidHeader=TRUE,
+                 verbatimTextOutput('colnames')
+               )
+            )
      ),
      tabItem(tabName="1d",
              fluidRow(

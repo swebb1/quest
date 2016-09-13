@@ -102,6 +102,21 @@ shinyServer(function(input, output,session) {
   },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 5)
   )
   
+  output$summarycols = renderUI({
+    fdf<-Data()
+    items<-names(fdf)
+    selectInput("summarycol","Select column",choices=items)
+  })
+  
+  output$tablesum = renderPrint({
+    fdf<-Data()
+    summary(fdf[,input$summarycol])
+  })
+  
+  output$colnames = renderPrint({
+    fdf<-Data()
+    names(fdf)
+  })
  ##1d plot controls
  output$plot_cols <- renderUI({
    if(is.null(Data())){return(NULL)}
@@ -359,7 +374,6 @@ shinyServer(function(input, output,session) {
    
    plot_gg<-reactive({
      if(is.null(Data())){return(NULL)}
-     withProgress(message="Plotting...",value=0,{
      fdf<-Data()
      #fdf<-filter(input$filts)
      if(input$auto){
@@ -417,16 +431,19 @@ shinyServer(function(input, output,session) {
                         gradient.range=zlim,condense=input$gg_condense,condense.x = input$gg_condense.x,condense.y = input$gg_condense.y,condense.func = input$gg_condense_func)
        return(p)
      }  
-     })
    })
    
    ##ggplot
    output$ggplot <- renderPlot({ 
+     withProgress(message="Plotting...",value=0,{
       plot_gg()
+     })
    })
    
    output$ggplotly <- renderPlotly({
-     plot_gg()
+     withProgress(message="Plotting...",value=0,{
+       plot_gg()
+     })
    })
    
   ##bin plot controls
