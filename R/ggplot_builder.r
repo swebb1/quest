@@ -12,8 +12,10 @@
 #' @param xrotate Angle to rotate x-axis labels (90=vertical)
 #' @param colour A variable to colour by
 #' @param fill A variable to fill by
+#' @param alpha A variable to alpha by
 #' @param man_colour Select a solid colour
 #' @param man_fill Select a solid fill colour
+#' @param man_alpha Select a static alpha value
 #' @param bar.position Position of bars in a bar plot (stack,dodge,fill)
 #' @param bins Add a stat_bin with this number of bins
 #' @param binwidth Size of binwidth in binned plots (histogram)
@@ -43,9 +45,9 @@
 #' ggplot_builder()
 
 
-ggplot_builder<-function(d,x,y=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
-                         fill=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
-                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,tile_height=NA,tile_width=NA,
+ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
+                         fill=NA,alpha=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
+                         theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
                          gradient="default",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
                          cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
                          condense=F,condense.func="mean",condense.x=10,condense.y=10){
@@ -55,13 +57,18 @@ library(ggplot2)
 library(bigvis)
 
 ###Avoid plotting with large factors
-for(i in c(facet,colour,fill,x)){
+for(i in c(facet,colour,fill,x,alpha)){
   factor_limit(d,i,factorlim)
 }
 if(!geom %in% c("histogram","bar") | (geom=="bar" & stat.method!="count")){ ##Check Y variable if applicable
   factor_limit(d,y,factorlim)
 }
-
+if(is.na(x)){
+  x<-"1"
+}
+if(is.na(y)){
+  y<-"1"
+}  
 ml<-matlab.like2(gradient.steps)
 
 ###build plot
@@ -73,8 +80,14 @@ if(geom=="point"){
   if(!is.na(colour)){
     a$colour<-colour
   }
+  if(!is.na(alpha)){
+    a$alpha<-alpha
+  }
   if(!is.na(man_colour)){
     g$colour<-man_colour
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_point,g)
@@ -85,8 +98,14 @@ if(geom=="tile"){
   if(!is.na(fill)){
     a$fill<-fill
   }
+  if(!is.na(alpha)){
+    a$alpha<-alpha
+  }
   if(!is.na(man_fill)){
     g$fill<-man_fill
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   if(!is.na(tile_width)){
     g$width<-tile_width
@@ -118,8 +137,14 @@ if(geom=="line"){
   if(!is.na(colour)){
     a$colour<-colour
   }
+  if(!is.na(alpha)){
+    a$alpha<-alpha
+  }
   if(!is.na(man_colour)){
     g$colour<-man_colour
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_line,g)
@@ -138,6 +163,9 @@ else if(geom=="bar"){
   g$position<-bar.position
   if(!is.na(man_fill)){
     g$fill<-man_fill
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   if(!is.na(stat.method)){
     g$stat<-stat.method
@@ -159,6 +187,9 @@ else if(geom=="histogram"){
   if(!is.na(man_fill)){
     g$fill<-man_fill
   }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
+  }
   if(binwidth>0){
     g$binwidth<-binwidth
   }
@@ -177,8 +208,14 @@ else if(geom=="boxplot"){
   if(!is.na(fill)){
     a$fill<-fill
   }
+  if(!is.na(alpha)){
+    a$alpha<-alpha
+  }
   if(!is.na(man_fill)){
     g$fill<-man_fill
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   if(!is.na(colour)){
     a$colour<-colour
@@ -186,9 +223,11 @@ else if(geom=="boxplot"){
   if(!is.na(man_colour)){
     g$colour<-man_colour
   }
-  if(is.numeric(d[,x])){
-    cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
-    a$group<-cut
+  if(x!="1"){ ##if x is set and numeric apply a group function
+    if(is.numeric(d[,x])){
+      cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
+      a$group<-cut
+    }
   }
   if(outliers==F){
     g$outlier.shape<-NA
@@ -216,6 +255,12 @@ else if(geom=="violin"){
   }
   if(!is.na(man_colour)){
     g$colour<-man_colour
+  }
+  if(!is.na(alpha)){
+    a$alpha<-alpha
+  }
+  if(!is.na(man_alpha)){
+    g$alpha<-man_alpha
   }
   if(is.numeric(d[,x])){
     cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
@@ -247,8 +292,10 @@ if(!is.na(smooth) & geom %in% c("point")){
   statas<-do.call(aes_string,s)
   p<-p+stat_smooth(method=smooth,statas)
 }
-if(!is.na(xlim) & is.numeric(d[,x])){
-  p<-p+xlim(xlim)
+if(x!="1"){
+  if(!is.na(xlim) & is.numeric(d[,x])){
+    p<-p+xlim(xlim)
+  }
 }
 if(!is.na(ylim)){
   if(!is.null(a$y)){#if y aesthetic exists
@@ -260,8 +307,10 @@ if(!is.na(ylim)){
     p<-p+ylim(ylim)
   }
 }
-if(logx & is.numeric(d[,x])){
-  p<-p+scale_x_log10()
+if(x!="1"){
+  if(logx & is.numeric(d[,x])){ #####!!!!!!!!!!
+    p<-p+scale_x_log10()
+  }
 }
 if(logy){
   if(!is.null(a$y)){ #if y aesthetic exists

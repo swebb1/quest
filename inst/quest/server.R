@@ -244,9 +244,9 @@ shinyServer(function(input, output,session) {
        })
        tagList(
          selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin","tile")),
-         selectInput("ggx", "Select x-axis",items),
+         selectInput("ggx", "Select x-axis",c("NA",items)),
          checkboxInput("gg_logx","Log x-axis",F),
-         selectInput("ggy", "Select y-axis",items),
+         selectInput("ggy", "Select y-axis",c("NA",items)),
          checkboxInput("gg_logy","Log y-axis",F),
          selectInput("gg_facet", "Facet plot by:",c("NA",items)),
          textInput("ggplotName","Save as:","Quest_plot"),
@@ -266,6 +266,7 @@ shinyServer(function(input, output,session) {
        tagList(
           selectInput("gg_fill","Colour fill by:",c("NA",items)),
           selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
+          selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items)),
           selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
           selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
           numericInput("gg_gradient.steps","Number of steps in gradient",10),
@@ -276,7 +277,8 @@ shinyServer(function(input, output,session) {
             numericInput("gg_gradient.max","Maximum gradient value",NULL)
           ),
           selectInput("gg_man_fill","Solid colour fill:",c("NA","firebrick","forest green","dodger blue")),
-          selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue"))
+          selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue")),
+          numericInput("gg_man_alpha","Select an alpha value for transparency:",0)
       )
      }
    })  
@@ -399,15 +401,22 @@ shinyServer(function(input, output,session) {
        }
        fill=NA
        colour=NA
+       alpha=NA
        man_fill=NA
        man_colour=NA
+       man_alpha=NA
        facet=NA
        smooth=NA
+       x=NA
+       y=NA
        if(input$gg_fill != "NA"){
          fill = input$gg_fill
        }
        if(input$gg_colour != "NA"){
          colour = input$gg_colour
+       }
+       if(input$gg_alpha != "NA"){
+         alpha = input$gg_alpha
        }
        if(input$gg_man_fill != "NA"){
          man_fill = input$gg_man_fill
@@ -415,18 +424,27 @@ shinyServer(function(input, output,session) {
        if(input$gg_man_colour != "NA"){
          man_colour = input$gg_man_colour
        }
+       if(input$gg_man_alpha != 0){
+         man_alpha = input$gg_man_alpha
+       }
        if(input$gg_smooth != "NA"){
          smooth = input$gg_smooth
        }
        if(input$gg_facet != "NA"){
          facet = input$gg_facet
        }
-       p<-ggplot_builder(d=fdf,x=input$ggx,y=input$ggy,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+       if(input$ggx != "NA"){
+         x = input$ggx
+       }
+       if(input$ggy != "NA"){
+         y = input$ggy
+       }
+       p<-ggplot_builder(d=fdf,x=x,y=y,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
                         geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
-                        fill=fill,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
+                        fill=fill,alpha=alpha,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
-                        gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,
+                        gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,
                         cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim,tile_width=tile_width,tile_height=tile_height,
                         gradient.range=zlim,condense=input$gg_condense,condense.x = input$gg_condense.x,condense.y = input$gg_condense.y,condense.func = input$gg_condense_func)
        return(p)
