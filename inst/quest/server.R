@@ -249,6 +249,7 @@ shinyServer(function(input, output,session) {
          selectInput("ggy", "Select y-axis",c("NA",items)),
          checkboxInput("gg_logy","Log y-axis",F),
          selectInput("gg_facet", "Facet plot by:",c("NA",items)),
+         actionButton("gg_plot","Plot",icon = shiny::icon("play")),
          textInput("ggplotName","Save as:","Quest_plot"),
          downloadButton('downloadggplot', 'Save plot as pdf')
        )
@@ -374,7 +375,7 @@ shinyServer(function(input, output,session) {
    outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
    
-   plot_gg<-reactive({
+   plot_gg<-eventReactive(input$gg_plot,{
      if(is.null(Data())){return(NULL)}
      fdf<-Data()
      #fdf<-filter(input$filts)

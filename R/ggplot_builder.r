@@ -262,9 +262,11 @@ else if(geom=="violin"){
   if(!is.na(man_alpha)){
     g$alpha<-man_alpha
   }
-  if(is.numeric(d[,x])){
-    cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
-    a$group<-cut
+  if(x!="1"){ ##if x is set and numeric apply a group function
+    if(is.numeric(d[,x])){
+      cut<-switch(cut_method,interval=cut_interval(d[,x],n = cut.n),width=cut_width(d[,x],width=cut.n),number=cut_number(d[,x],n = cut.n))
+      a$group<-cut
+    }
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_violin,g)
@@ -297,7 +299,7 @@ if(x!="1"){
     p<-p+xlim(xlim)
   }
 }
-if(!is.na(ylim)){
+if(!is.na(ylim) & y!="1"){
   if(!is.null(a$y)){#if y aesthetic exists
     if(is.numeric(d[,y])){ #if y aestheitc is numeric
       p<-p+ylim(ylim)
@@ -312,7 +314,7 @@ if(x!="1"){
     p<-p+scale_x_log10()
   }
 }
-if(logy){
+if(logy & y!="1"){
   if(!is.null(a$y)){ #if y aesthetic exists
     if(is.numeric(d[,y])){ #if y aestheitc is numeric
       p<-p+ scale_y_log10()
