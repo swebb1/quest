@@ -39,25 +39,37 @@ shinyServer(function(input, output,session) {
     )
   })
   
+  roots<-c(home= '~')
+  shinyFileChoose(input, 'sfile', roots=roots, session=session,filetypes=c('', 'txt','tab'))
+  input_files <- reactive({
+    id<-""
+    if(!is.null(input$sfile)){
+      id<-parseFilePaths(roots, input$sfile)
+      id<-as.character(id$datapath)
+    }
+    return(id)
+  })
+  output$path <- renderText(input_files())
+  
   ##Get data
   Data<-reactive({
-    if(is.null(input$file) & is.null(input$files) & is.null(input$object)){
+    if(is.null(input$file) & is.null(input$sfile) & is.null(input$object)){
       df<-test
       return(df)
     }
     else if(input$inputType=="Upload"){
       inFile<-input$file
-      if(is.null(inFile)){
+      if(inFile == "" | is.null(inFile)){
         return(NULL)
       }
       df<-read.table(inFile$datapath,header=input$header,fill=T)
     }
     else if(input$inputType=="Server"){
-        inFile<-input$files
-        if(is.null(inFile)){
-          return(NULL)
-        }
-        df<-read.table(inFile,header=input$header,fill=T)
+      inFile<-input_files()
+      if(is.null(inFile)){
+        return(NULL)
+      }
+      df<-read.table(inFile,header=input$header,fill=T)
     }
     else if(input$inputType=="Environment"){
       if(is.data.frame(get(input$object))){
@@ -82,8 +94,8 @@ shinyServer(function(input, output,session) {
   ##Create a file download button
   output$downloadFiles<-renderUI({
     downloadName<-"Table.tab"
-    if(input$inputType=="Server" & !is.null(input$files)){
-      downloadName<-basename(input$files)
+    if(input$inputType=="Server" & !is.null(input$sfile)){
+      downloadName<-basename(input_files())
     }
     else if(input$inputType=="Upload" & !is.null(input$file)){
       inFile<-input$file
@@ -249,7 +261,6 @@ shinyServer(function(input, output,session) {
          selectInput("ggy", "Select y-axis",c("NA",items)),
          checkboxInput("gg_logy","Log y-axis",F),
          selectInput("gg_facet", "Facet plot by:",c("NA",items)),
-         actionButton("gg_plot","Plot",icon = shiny::icon("play")),
          textInput("ggplotName","Save as:","Quest_plot"),
          downloadButton('downloadggplot', 'Save plot as pdf')
        )
@@ -375,7 +386,7 @@ shinyServer(function(input, output,session) {
    outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
    
-   plot_gg<-eventReactive(input$gg_plot,{
+   plot_gg<-reactive({
      if(is.null(Data())){return(NULL)}
      fdf<-Data()
      #fdf<-filter(input$filts)

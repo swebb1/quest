@@ -39,11 +39,13 @@ shinyUI(dashboardPage(
                    ),
                    conditionalPanel(
                      condition = "input.inputType == 'Server'",
-                     textInput("dir","Select file directory:",value=ifelse(exists("wd"),wd,"")), ##maybe a bad hack to set wd as getwd() during runQuest call
-                     checkboxInput("recursive", "Search directory recursively", FALSE),
-                     textInput("pattern","Search pattern","",placeholder="*.tab"),
-                     actionButton("list_dir","List",icon = shiny::icon("folder-open")),
-                     uiOutput("inFiles")
+                     shinyFilesButton('sfile','Upload','Locate file',FALSE),
+                     h4(textOutput('path'))
+                     #textInput("dir","Select file directory:",value=ifelse(exists("wd"),wd,"")), ##maybe a bad hack to set wd as getwd() during runQuest call
+                     #checkboxInput("recursive", "Search directory recursively", FALSE),
+                     #textInput("pattern","Search pattern","",placeholder="*.tab"),
+                     #actionButton("list_dir","List",icon = shiny::icon("folder-open")),
+                     #uiOutput("inFiles")
                    ),
                    conditionalPanel(
                      condition = "input.inputType == 'Environment'",
