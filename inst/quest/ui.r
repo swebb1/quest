@@ -20,7 +20,6 @@ shinyUI(dashboardPage(
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
         checkboxInput("freeze","Freeze inputs",value = F),
-        checkboxInput("execute","Apply R code",value = F),
         actionButton("close","Close Quest",icon = shiny::icon("close"),style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
       )
   ),
@@ -250,7 +249,8 @@ shinyUI(dashboardPage(
      box(
        title="R Code",width = 12,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
        HTML('<textarea id="add" rows="6" cols="150"></textarea>'),
-       helpText("See help tab for examples")
+       helpText("See help tab for examples"),
+       actionButton("execute","Apply R code")
      )
    )
   )

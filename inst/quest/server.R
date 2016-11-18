@@ -22,23 +22,30 @@ shinyServer(function(input, output,session) {
     df
   } 
   
-  ##List available files in directory
-  observeEvent(input$list_dir, {
-    withProgress(message="Listing files...",value=0,{
-      output$inFiles <- renderUI({
-        tagList(
-          radioButtons('files', 'Select file:',list.files(input$dir,include.dirs = F,recursive=input$recursive,full.names = T,pattern=input$pattern))
-        )
-      })
-    })
+  ##Get filtering code
+  codefilter<-eventReactive(input$execute,{
+    return(input$add)
   })
   
+  ##List available files in directory (no longer required with shinyFiles)
+  #observeEvent(input$list_dir, {
+  #  withProgress(message="Listing files...",value=0,{
+  #    output$inFiles <- renderUI({
+  #      tagList(
+  #        radioButtons('files', 'Select file:',list.files(input$dir,include.dirs = F,recursive=input$recursive,full.names = T,pattern=input$pattern))
+  #      )
+  #    })
+  #  })
+  #})
+  
+  ##ui to select an environment object
   output$inObjects <- renderUI({
     tagList(
       radioButtons('object', 'Select data.frame object from current environment:',ls(pos=1))
     )
   })
   
+  ##ui to select server file
   roots<-c(home= '~')
   shinyFileChoose(input, 'sfile', roots=roots, session=session,filetypes=c('', 'txt','tab'))
   input_files <- reactive({
@@ -53,16 +60,17 @@ shinyServer(function(input, output,session) {
   
   ##Get data
   Data<-reactive({
-    if(is.null(input$file) & is.null(input$sfile) & is.null(input$object)){
-      df<-test
-      return(df)
-    }
-    else if(input$inputType=="Upload"){
-      inFile<-input$file
-      if(inFile == "" | is.null(inFile)){
-        return(NULL)
+    if(input$inputType=="Upload"){
+      if(is.null(input$file)){
+        df<-test
       }
-      df<-read.table(inFile$datapath,header=input$header,fill=T)
+      else{
+        inFile<-input$file
+        if(inFile == "" | is.null(inFile)){
+          return(NULL)
+        }
+        df<-read.table(inFile$datapath,header=input$header,fill=T)
+      }
     }
     else if(input$inputType=="Server"){
       inFile<-input_files()
@@ -79,17 +87,12 @@ shinyServer(function(input, output,session) {
         return(NULL)
       }
     }
-    if(input$execute){
-      try({
-        df<-filter(df,input$add)
+    try({
+        df<-filter(df,codefilter())
         return(df)
-      })
-      return<-NULL
-    }
-    else{
-      return(df)
-    }
-  })
+    })
+    return<-df
+})
   
   ##Create a file download button
   output$downloadFiles<-renderUI({
