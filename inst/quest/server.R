@@ -5,6 +5,8 @@ shinyServer(function(input, output,session) {
     stopApp()
   })
   
+  values<-reactiveValues(items=vector(),numeric=vector())
+  
   ##filter function based on R code
   filter<-function(d,fstring){
     df<-d
@@ -89,10 +91,14 @@ shinyServer(function(input, output,session) {
     }
     try({
         df<-filter(df,codefilter())
+        values$numeric<-names(df[,sapply(df,is.numeric),drop=F])
+        values$items<-names(df)
         return(df)
     })
+    values$numeric<-names(df[,sapply(df,is.numeric),drop=F])
+    values$items=names(df)
     return<-df
-})
+  })
   
   ##Create a file download button
   output$downloadFiles<-renderUI({
@@ -118,9 +124,7 @@ shinyServer(function(input, output,session) {
   )
   
   output$summarycols = renderUI({
-    fdf<-Data()
-    items<-names(fdf)
-    selectInput("summarycol","Select column",choices=items)
+    selectInput("summarycol","Select column",choices=values$items)
   })
   
   output$tablesum = renderPrint({
@@ -134,17 +138,13 @@ shinyServer(function(input, output,session) {
   })
  ##1d plot controls
  output$plot_cols <- renderUI({
-   if(is.null(Data())){return(NULL)}
-   #fdf<-filter(input$filts)
-   if(!input$freeze){
-     isolate({
-       fdf<-Data()
-       items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-     }) 
-    tagList(
+   isolate({
+    if(is.null(Data())){return(NULL)}
+   })
+   items=values$numeric #get numeric columns only
+   tagList(
       selectInput("x", "Columns to plot",items,multiple=T,selected = items[1])    
     )
-   }
  })
   
  ##1d plot
@@ -189,18 +189,14 @@ shinyServer(function(input, output,session) {
   
  ##2d plot cols
  output$dplot_cols <- renderUI({
-   if(is.null(Data())){return(NULL)}
-   #fdf<-filter(input$filts)
-   if(!input$freeze){
-     isolate({
-       fdf<-Data()
-       items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-     })   
-     tagList(
+   isolate({
+    if(is.null(Data())){return(NULL)}
+   })  
+   items=values$numeric #get numeric columns only
+   tagList(
        selectInput("dx", "Column to plot",items),
        selectInput("dy", "Column to plot",items)
-     )
-   }
+   )
  })
  
    ##2d plot
@@ -250,89 +246,31 @@ shinyServer(function(input, output,session) {
 
    ##ggplot data
    output$ggplot_cols <- renderUI({
-     if(is.null(Data())){return(NULL)}
-     #fdf<-filter(input$filts)
-     if(!input$freeze){
-       isolate({
-        fdf<-Data()
-        items=names(fdf)
-       })
-       tagList(
-         selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin","tile")),
-         selectInput("ggx", "Select x-axis",c("NA",items)),
-         checkboxInput("gg_logx","Log x-axis",F),
-         selectInput("ggy", "Select y-axis",c("NA",items)),
-         checkboxInput("gg_logy","Log y-axis",F),
-         selectInput("gg_facet", "Facet plot by:",c("NA",items)),
-         textInput("ggplotName","Save as:","Quest_plot"),
-         downloadButton('downloadggplot', 'Save plot as pdf')
+     isolate({
+      if(is.null(Data())){return(NULL)}
+     })
+     items=values$items
+     tagList(
+       selectInput("ggx", "Select x-axis",c("NA",items)),
+       selectInput("ggy", "Select y-axis",c("NA",items)),
+       selectInput("gg_facet", "Facet plot by:",c("NA",items))
        )
-     }
    })  
   
    output$ggplot_colours <- renderUI({
-     if(is.null(Data())){return(NULL)}
-     #fdf<-filter(input$filts)
-     if(!input$freeze){
-       isolate({
-        fdf<-Data()
-        items=names(fdf)
-       })
-       tagList(
+     isolate({
+      if(is.null(Data())){return(NULL)}
+     })
+     items=values$items
+     tagList(
           selectInput("gg_fill","Colour fill by:",c("NA",items)),
           selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
-          selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items)),
-          selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
-          selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
-          numericInput("gg_gradient.steps","Number of steps in gradient",10),
-          checkboxInput("gg_grad_manual","Set gradient range manually:",F),
-          conditionalPanel(
-            condition = "input.gg_grad_manual == true",
-            numericInput("gg_gradient.min","Minimum gradient value",NULL),
-            numericInput("gg_gradient.max","Maximum gradient value",NULL)
-          ),
-          selectInput("gg_man_fill","Solid colour fill:",c("NA","firebrick","forest green","dodger blue")),
-          selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue")),
-          numericInput("gg_man_alpha","Select an alpha value for transparency:",0)
+          selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items))
       )
-     }
    })  
-   
-   ##ggplot layout
-   output$ggplot_plot <- renderUI({
-     if(is.null(Data())){return(NULL)}
-     #fdf<-filter(input$filts)
-     if(!input$freeze){
-       isolate({
-         fdf<-Data()
-         items=names(fdf)
-       })
-       tagList(
-         numericInput("gg_xrotate","Rotate X-axis labels",0),
-         checkboxInput("gg_plotly","Activate Plotly"),
-         selectInput("gg_theme", "Plot theme:",c("grey","bw","dark","light","void","linedraw","minimal","classsic")),
-         checkboxInput("gg_manual","Set axes manually:",F),
-         conditionalPanel(
-           condition = "input.gg_manual == true",
-           numericInput("gg_xmin","X-axis minimum",NULL),
-           numericInput("gg_xmax","X-axis maximum",NULL),
-           numericInput("gg_ymin","Y-axis minimum",NULL),
-           numericInput("gg_ymax","Y-axis maximum",NULL)
-         ),
-         checkboxInput("gg_coord_flip","Flip axes:",F)
-       )
-     }
-   })
    
    ##ggplot controls
    output$ggplot_controls <- renderUI({
-     if(is.null(Data())){return(NULL)}
-     #fdf<-filter(input$filts)
-     if(!input$freeze){
-       isolate({
-         fdf<-Data()
-         items=names(fdf)
-       })
        tagList(
          conditionalPanel(condition="input.gg_geom == 'histogram'",
               numericInput("gg_bins","Number of bins (0=default):",0),
@@ -380,13 +318,12 @@ shinyServer(function(input, output,session) {
               )
          )
        )
-     }
    })
    
    #Do not inactivate tabs
    outputOptions(output, 'ggplot_cols', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_colours', suspendWhenHidden=FALSE)
-   outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
+   #outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
    
    plot_gg<-reactive({
@@ -481,19 +418,15 @@ shinyServer(function(input, output,session) {
    
   ##bin plot controls
   output$bin_cols <- renderUI({
-    if(is.null(Data())){return(NULL)}
-    #fdf<-filter(input$filts)
-    if(!input$freeze){
-      isolate({
-        fdf<-Data()
-        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-      })
-      tagList(
+    isolate({
+      if(is.null(Data())){return(NULL)}
+    })
+    items=values$numeric #get numeric columns only
+    tagList(
         selectInput("bx", "Column to bin X-axis by",items), 
         selectInput("by", "Columns to plot",items,multiple=T,selected = items[1]),
         selectInput("baxis3", "Column to plot on separate axis (e.g. length of regions)",c("NA",items))
-      )
-    }
+    )
   })
   
   ##bin plot
@@ -513,14 +446,11 @@ shinyServer(function(input, output,session) {
   
   ##tile controls
   output$t_cols <- renderUI({
-    if(is.null(Data())){return(NULL)}
-    #fdf<-filter(input$filts)
-    if(!input$freeze){
-      isolate({
-        fdf<-Data()
-        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-      })
-      tagList(
+    isolate({
+      if(is.null(Data())){return(NULL)}
+    })
+    items=values$numeric #get numeric columns only
+    tagList(
         selectInput("tx", "X-axis",items), 
         numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
         checkboxInput("tlogx","Log",value = F),
@@ -531,7 +461,6 @@ shinyServer(function(input, output,session) {
         numericInput("tzs","Scale",1),
         checkboxInput("tlogz","Log",value = F)
         )
-    }
   })
   
   ##tile plots
@@ -563,21 +492,19 @@ shinyServer(function(input, output,session) {
   })
   
   ##heatmap
-  ##bin plot controls
+  ##plot controls
   output$h_cols <- renderUI({
-    if(is.null(Data())){return(NULL)}
-    #fdf<-filter(input$filts)
-    if(!input$freeze){
-      isolate({
-        fdf<-Data()
-        items=names(fdf[,sapply(fdf,is.numeric),drop=F]) #get numeric columns only
-        rnames=names(fdf)
-      })
-      tagList(
+    isolate({
+      if(is.null(Data())){return(NULL)}
+    })
+    items=values$numeric #get numeric columns only
+    rnames=values$items
+    tagList(
         selectInput("hrows", "Column to use for row names:",rnames), 
-        selectInput("hcols", "Columns to include in heatmap",items,multiple=T,selected = items[1:2])      )
-    }
+        selectInput("hcols", "Columns to include in heatmap",items,multiple=T,selected = items[1:2])      
+    )
   })
+  
   output$hmap<-renderD3heatmap({
     if(is.null(Data())){return(NULL)}
     fdf<-Data()

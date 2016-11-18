@@ -19,7 +19,6 @@ shinyUI(dashboardPage(
         menuItem("Settings",tabName="settings",icon=shiny::icon("cogs")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
         checkboxInput("auto","Auto-plot",value = T),
-        checkboxInput("freeze","Freeze inputs",value = F),
         actionButton("close","Close Quest",icon = shiny::icon("close"),style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
       )
   ),
@@ -135,9 +134,42 @@ shinyUI(dashboardPage(
                ),
                tabBox(
                  width = 4,
-                 tabPanel("Inputs",uiOutput("ggplot_cols")),
-                 tabPanel("Colours",uiOutput("ggplot_colours")),
-                 tabPanel("Layout",uiOutput("ggplot_plot")),
+                 tabPanel("Inputs",
+                          selectInput("gg_geom","Choose plot geometry",c("histogram","bar","point","line","boxplot","violin","tile")),
+                          uiOutput("ggplot_cols"),
+                          checkboxInput("gg_logx","Log x-axis",F),
+                          checkboxInput("gg_logy","Log y-axis",F),
+                          textInput("ggplotName","Save as:","Quest_plot"),
+                          downloadButton('downloadggplot', 'Save plot as pdf')
+                 ),
+                 tabPanel("Colours",uiOutput("ggplot_colours"),
+                          selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
+                          selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
+                          numericInput("gg_gradient.steps","Number of steps in gradient",10),
+                          checkboxInput("gg_grad_manual","Set gradient range manually:",F),
+                          conditionalPanel(
+                            condition = "input.gg_grad_manual == true",
+                            numericInput("gg_gradient.min","Minimum gradient value",NULL),
+                            numericInput("gg_gradient.max","Maximum gradient value",NULL)
+                          ),
+                          selectInput("gg_man_fill","Solid colour fill:",c("NA","firebrick","forest green","dodger blue")),
+                          selectInput("gg_man_colour","Solid colour points and lines:",c("NA","firebrick","forest green","dodger blue")),
+                          numericInput("gg_man_alpha","Select an alpha value for transparency:",0)
+                 ),
+                 tabPanel("Layout",
+                          numericInput("gg_xrotate","Rotate X-axis labels",0),
+                          checkboxInput("gg_plotly","Activate Plotly"),
+                          selectInput("gg_theme", "Plot theme:",c("grey","bw","dark","light","void","linedraw","minimal","classsic")),
+                          checkboxInput("gg_manual","Set axes manually:",F),
+                          conditionalPanel(
+                            condition = "input.gg_manual == true",
+                            numericInput("gg_xmin","X-axis minimum",NULL),
+                            numericInput("gg_xmax","X-axis maximum",NULL),
+                            numericInput("gg_ymin","Y-axis minimum",NULL),
+                            numericInput("gg_ymax","Y-axis maximum",NULL)
+                          ),
+                          checkboxInput("gg_coord_flip","Flip axes:",F)
+                 ),
                  tabPanel("Controls",uiOutput("ggplot_controls"))
                )
              )
@@ -250,8 +282,8 @@ shinyUI(dashboardPage(
        title="R Code",width = 12,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
        HTML('<textarea id="add" rows="6" cols="150"></textarea>'),
        helpText("See help tab for examples"),
-       actionButton("execute","Apply R code")
-     )
+       actionButton("execute","Apply code",icon=shiny::icon("arrow-circle-right"))
+    )
    )
   )
 )
