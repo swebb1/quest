@@ -6,6 +6,7 @@
 #' @param logx,logy Log the variable first. Defaults to F.
 #' @param geom Select a ggplot2 geometry (currently point,line,histogram,bar,boxplot,violin)
 #' @param facet Facet plot by values in a column
+#' @param facet_drop Drop faceted panels without values (T)
 #' @param smooth Add a smooth line to point plots (gam,lm,loess,rlm,glm,auto)
 #' @param xlim Range displayed on x-axis
 #' @param ylim Range displayed on y-axis
@@ -46,7 +47,7 @@
 #' ggplot_builder()
 
 
-ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
+ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,facet_drop=T,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
                          fill=NA,alpha=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
                          gradient="default",gradient.trans="identity",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
@@ -277,12 +278,12 @@ else if(geom=="violin"){
 }
 p<-ggplot(d,as)+geo
 if(!is.na(facet)){
-  if(is.factor(d[,facet])&length(levels(d[,facet]))<=factorlim){
-    p<-p+facet_wrap(c(facet))
-  }
-  else{
-    stop(paste("You must facet by a factor variable with <=",factorlim,"levels"))
-  }  
+  #if(is.factor(d[,facet])&length(levels(d[,facet]))<=factorlim){
+    p<-p+facet_wrap(facet,drop=facet_drop)
+  #}
+  #else{
+  #  stop(paste("You must facet by a factor variable with <=",factorlim,"levels"))
+  #}  
 }
 if(!is.na(smooth) & geom %in% c("point")){
   s<-list()
