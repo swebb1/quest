@@ -21,4 +21,3 @@ factor_limit()
 }
 \keyword{factor}
 \keyword{limits}
-

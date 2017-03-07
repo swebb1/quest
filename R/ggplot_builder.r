@@ -24,6 +24,7 @@
 #' @param gradient Select gradient colour scheme (default,Matlab)
 #' @param gradient.steps Set number of shades in gradient
 #' @param gradient.range Set range of values covered by gradient
+#' @param gradient.trans Transform gradient scale (identity,log,log10,log2,sqrt)
 #' @param colourset Select colour scheme (default,Set1,Set2,Set3,Spectral)
 #' @param cut_method Select method for binning continuous X axis in boxplots (number,interval,width see cut_interval etc.)
 #' @param cut.n Binning number applied to cut_method
@@ -48,13 +49,15 @@
 ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
                          fill=NA,alpha=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
-                         gradient="default",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
+                         gradient="default",gradient.trans="identity",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
                          cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
                          condense=F,condense.func="mean",condense.x=10,condense.y=10){
 library(plotly)
 library(colorRamps)
 library(ggplot2)
 library(bigvis)
+library(scales)
+library(munsell)
 
 ###Avoid plotting with large factors
 for(i in c(facet,colour,fill,x,alpha)){
@@ -69,8 +72,9 @@ if(is.na(x)){
 if(is.na(y)){
   y<-"1"
 }  
+#color palettes
 ml<-matlab.like2(gradient.steps)
-
+default<-mnsl(c("2.5PB 2/4", "2.5PB 7/10"))
 ###build plot
 a<-list()
 g<-list()
@@ -339,10 +343,10 @@ if(!is.na(colour)){
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_colour_gradient(limits=gradient.range,oob = scales::squish,space="Lab"),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml))
+      p<-switch(gradient,default=p+scale_colour_gradient(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
     }
     else{
-      p<-switch(gradient,default=p,Matlab=p+scale_colour_gradientn(colours=ml))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_colour_gradientn(colours=ml,trans=gradient.trans))
     }
   }
 }
@@ -355,10 +359,10 @@ if(!is.na(fill)){
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_fill_gradient(limits=gradient.range,oob = scales::squish,space="Lab"),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml))
+      p<-switch(gradient,default=p+scale_fill_gradient(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
     }
     else{
-      p<-switch(gradient,default=p,Matlab=p+scale_fill_gradientn(colours=ml))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_fill_gradientn(colours=ml,trans=gradient.trans))
     }  }
 }
 if(coord_flip){

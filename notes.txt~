@@ -1,0 +1,16 @@
+
+Save table as tab file or new environment variable??
+
+Settings panel (colours etc)??
+
+ggplot functions
+--point size/shape
+--geom_jitter() even just to boxplot.
+--legendposition
+--output code to replicate in R?
+--adding layers e.g. stats and geoms on top of plots with own colour aes (remove smooth from controls and include as new layer)
+--boxplot multiple columns against each other (melt?)
+
+--Figure out binning where X=1 or Y=1 with bigvis package. Maybe just add new column of 1s and move x to temp column instead of x=1??
+
+log in and sql database to save files?

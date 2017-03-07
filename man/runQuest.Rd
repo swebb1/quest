@@ -15,4 +15,3 @@ quest()
 }
 \keyword{quest}
 \keyword{shiny}
-

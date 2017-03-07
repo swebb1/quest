@@ -49,4 +49,3 @@ bplot()
 \keyword{average}
 \keyword{bin}
 \keyword{plots.}
-

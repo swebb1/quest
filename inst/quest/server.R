@@ -396,7 +396,7 @@ shinyServer(function(input, output,session) {
                         fill=fill,alpha=alpha,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
-                        gradient=input$gg_gradient,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,
+                        gradient=input$gg_gradient,gradient.trans=input$gg_gradient.trans,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,
                         cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim,tile_width=tile_width,tile_height=tile_height,
                         gradient.range=zlim,condense=input$gg_condense,condense.x = input$gg_condense.x,condense.y = input$gg_condense.y,condense.func = input$gg_condense_func)
        return(p)

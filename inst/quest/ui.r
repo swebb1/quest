@@ -80,7 +80,7 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                  title="1D plots",width = 8,status="primary",solidHeader=TRUE,
-                 plotOutput("plot")
+                 plotOutput("plot",height = "600px")
                ),
                box(
                  title="Controls",width = 4,collapsible = T,status="success",solidHeader=TRUE,
@@ -105,7 +105,7 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                    title="2D plots",width = 8,status="primary",solidHeader=TRUE,
-                   plotOutput("dplot")
+                   plotOutput("dplot",height = "600px")
                ),
                box(
                  title="Controls",width = 4,collapsible = T,status="success",solidHeader=TRUE,
@@ -126,10 +126,10 @@ shinyUI(dashboardPage(
                box(
                  title="gg plot",width = 8,status="primary",solidHeader=TRUE,
                  conditionalPanel(condition="input.gg_plotly==false",
-                  plotOutput("ggplot")
+                  plotOutput("ggplot",height = "600px")
                  ),
                  conditionalPanel(condition = "input.gg_plotly==true",
-                  plotlyOutput("ggplotly")
+                  plotlyOutput("ggplotly",height = "600px")
                  )
                ),
                tabBox(
@@ -145,6 +145,7 @@ shinyUI(dashboardPage(
                  tabPanel("Colours",uiOutput("ggplot_colours"),
                           selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
                           selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
+                          selectInput("gg_gradient.trans","Transform gradient values:",c("identity","log","log2","log10","sqrt")),
                           numericInput("gg_gradient.steps","Number of steps in gradient",10),
                           checkboxInput("gg_grad_manual","Set gradient range manually:",F),
                           conditionalPanel(
@@ -178,7 +179,7 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                  title="Binned plot",width = 8,status="primary",solidHeader=TRUE,
-                 plotOutput("bplot")
+                 plotOutput("bplot",height = "600px")
                ),
                box(
                  title="Controls",width = 4,status="success",solidHeader=TRUE,
@@ -207,7 +208,7 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                    title="3D tile plot",width = 8,status="primary",solidHeader=TRUE,
-                   plotOutput("tplot")
+                   plotOutput("tplot",height = "600px")
                ),
                box(
                  title="Data",width = 4,status="success",solidHeader=TRUE,
@@ -245,7 +246,7 @@ shinyUI(dashboardPage(
              fluidRow(
                box(
                  title="Heatmaps",width = 8,status="primary",solidHeader=TRUE,
-                 d3heatmapOutput("hmap")
+                 d3heatmapOutput("hmap",height = "600px")
                ),
                box(
                  title="Data",width = 4,status="success",solidHeader=TRUE,

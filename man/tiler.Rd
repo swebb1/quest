@@ -40,4 +40,3 @@ tiler()
 }
 \keyword{plots}
 \keyword{tile}
-

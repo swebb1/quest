@@ -4,14 +4,17 @@
 \alias{ggplot_builder}
 \title{ggplot_builder function}
 \usage{
-ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
+ggplot_builder(d, x = NA, y = NA, geom = "point", facet = NA,
   smooth = NA, smooth.se = T, xlim = NA, ylim = NA, xrotate = 0,
-  colour = NA, fill = NA, bar.position = "stack", binwidth = 0,
-  bins = 0, outliers = T, varwidth = F, enable.plotly = F,
-  theme = "grey", logx = F, logy = F, man_colour = NA, man_fill = NA,
-  gradient = "default", gradient.steps = 10, colourset = "default",
+  colour = NA, fill = NA, alpha = NA, bar.position = "stack",
+  binwidth = 0, bins = 0, outliers = T, varwidth = F,
+  enable.plotly = F, theme = "grey", logx = F, logy = F,
+  man_colour = NA, man_fill = NA, man_alpha = NA, tile_height = NA,
+  tile_width = NA, gradient = "default", gradient.trans = "identity",
+  gradient.steps = 10, gradient.range = NA, colourset = "default",
   coord_flip = F, cut_method = "number", cut.n = 10, factorlim = 50,
-  stat.method = "count", stat.func = "mean")
+  stat.method = "count", stat.func = "mean", condense = F,
+  condense.func = "mean", condense.x = 10, condense.y = 10)
 }
 \arguments{
 \item{d}{Table of data}
@@ -34,6 +37,8 @@ ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
 
 \item{fill}{A variable to fill by}
 
+\item{alpha}{A variable to alpha by}
+
 \item{bar.position}{Position of bars in a bar plot (stack,dodge,fill)}
 
 \item{binwidth}{Size of binwidth in binned plots (histogram)}
@@ -54,9 +59,19 @@ ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
 
 \item{man_fill}{Select a solid fill colour}
 
+\item{man_alpha}{Select a static alpha value}
+
+\item{tile_height}{Set height of tile for geom_tile}
+
+\item{tile_width}{Set width of tile for geom_tile}
+
 \item{gradient}{Select gradient colour scheme (default,Matlab)}
 
-\item{gradient.steps}{Set outliers=F to remove outliers from boxplot}
+\item{gradient.trans}{Transform gradient scale (identity,log,log10,log2,sqrt)}
+
+\item{gradient.steps}{Set number of shades in gradient}
+
+\item{gradient.range}{Set range of values covered by gradient}
 
 \item{colourset}{Select colour scheme (default,Set1,Set2,Set3,Spectral)}
 
@@ -71,6 +86,14 @@ ggplot_builder(d, x, y = NA, z = NA, geom = "point", facet = NA,
 \item{stat.method}{Set stat method for barplots (count,identity,summary) (default=bin)}
 
 \item{stat.func}{Set summary function for stat.method="summary" (default=mean)}
+
+\item{condense}{Use bigvis package to summarise overlapping points in large datasets}
+
+\item{condense.func}{Function used to condense (mean,median,sum,count)}
+
+\item{condense.x}{Size of bin to use on X axis to find overlapping points}
+
+\item{condense.y}{Size of bin to use on Y axis to find overlapping points}
 }
 \description{
 This function builds a ggplot2 function to plot data
@@ -81,4 +104,3 @@ ggplot_builder()
 \keyword{builder}
 \keyword{ggplot}
 \keyword{wrapper}
-
