@@ -5,7 +5,7 @@ shinyServer(function(input, output,session) {
     stopApp()
   })
   
-  values<-reactiveValues(items=vector(),numeric=vector())
+  values<-reactiveValues(items=vector(),numeric=vector(),factor=vector())
   
   ##filter function based on R code
   filter<-function(d,fstring){
@@ -92,10 +92,12 @@ shinyServer(function(input, output,session) {
     try({
         df<-filter(df,codefilter())
         values$numeric<-names(df[,sapply(df,is.numeric),drop=F])
+        values$factor<-names(df[,sapply(df,is.factor),drop=F])
         values$items<-names(df)
         return(df)
     })
     values$numeric<-names(df[,sapply(df,is.numeric),drop=F])
+    values$factor<-names(df[,sapply(df,is.factor),drop=F])
     values$items=names(df)
     return<-df
   })
@@ -250,11 +252,18 @@ shinyServer(function(input, output,session) {
       if(is.null(Data())){return(NULL)}
      })
      items=values$items
+     items.f=values$factor
      tagList(
        selectInput("ggx", "Select x-axis",c("NA",items)),
        selectInput("ggy", "Select y-axis",c("NA",items)),
-       selectInput("gg_facet", "Facet plot by:",c("NA",items))
+       checkboxInput("gg_faceted","Facet plots",F),
+       conditionalPanel(condition = "input.gg_faceted == true",
+          selectInput("gg_facet", "Facet plot by:",items.f,multiple = T),
+          checkboxInput("gg_facet_drop","Drop faceted panels without data",T),
+          numericInput("gg_facet_row","Number of rows:",0),
+          numericInput("gg_facet_col","Number of columns:",0)
        )
+     )
    })  
   
    output$ggplot_colours <- renderUI({
@@ -326,6 +335,7 @@ shinyServer(function(input, output,session) {
    #outputOptions(output, 'ggplot_plot', suspendWhenHidden=FALSE)
    outputOptions(output, 'ggplot_controls', suspendWhenHidden=FALSE)
    
+   #plot_gg<-eventReactive(input$gg_plot,{
    plot_gg<-reactive({
      if(is.null(Data())){return(NULL)}
      fdf<-Data()
@@ -382,7 +392,7 @@ shinyServer(function(input, output,session) {
        if(input$gg_smooth != "NA"){
          smooth = input$gg_smooth
        }
-       if(input$gg_facet != "NA"){
+       if(input$gg_faceted){
          facet = input$gg_facet
        }
        if(input$ggx != "NA"){
@@ -391,7 +401,7 @@ shinyServer(function(input, output,session) {
        if(input$ggy != "NA"){
          y = input$ggy
        }
-       p<-ggplot_builder(d=fdf,x=x,y=y,logx=input$gg_logx,logy=input$gg_logy,facet=facet,
+       p<-ggplot_builder(d=fdf,x=x,y=y,logx=input$gg_logx,logy=input$gg_logy,facet=facet,facet_drop=input$gg_facet_drop,facet_row=input$gg_facet_row,facet_col=input$gg_facet_col,
                         geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
                         fill=fill,alpha=alpha,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,

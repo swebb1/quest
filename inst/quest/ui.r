@@ -126,8 +126,8 @@ shinyUI(dashboardPage(
                box(
                  title="gg plot",width = 8,status="primary",solidHeader=TRUE,
                  conditionalPanel(condition="input.gg_plotly==false",
-                  plotOutput("ggplot",height = "600px"),
-                  actionButton("gg_plot",label = "Plot")
+                  plotOutput("ggplot",height = "600px")
+                  #actionButton("gg_plot",label = "Plot")
                  ),
                  conditionalPanel(condition = "input.gg_plotly==true",
                   plotlyOutput("ggplotly",height = "600px")
