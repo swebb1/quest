@@ -61,6 +61,8 @@ library(ggplot2)
 library(bigvis)
 library(scales)
 library(munsell)
+library(ggthemes)
+library(ggExtra)
 
 ###Avoid plotting with large factors
 for(i in c(facet,colour,fill,x,alpha)){

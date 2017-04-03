@@ -7,6 +7,12 @@ library(reshape2)
 library(corrplot)
 library(RColorBrewer)
 library(d3heatmap)
+library(zoo)
+library(bigvis)
+library(ggthemes)
+library(colorRamps)
+library(scales)
+library(ggExtra)
 
 #set maximum file size
 options(shiny.maxRequestSize=500*1024^2) #500Mb
