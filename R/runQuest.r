@@ -6,7 +6,7 @@
 #' quest()
 
 runQuest <- function() {
-  wd<<-getwd()
+  #qwd<<-getwd()
   appDir <- system.file("quest", package = "quest")
   if (appDir == "") {
     stop("Could not find directory. Try re-installing `quest`.", call. = FALSE)

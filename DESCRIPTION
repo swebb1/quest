@@ -15,7 +15,6 @@ Imports:
   plotly,
   colorRamps,
   ggplot2,
-  bigvis,
   scales,
   munsell,
   ggthemes,
