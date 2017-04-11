@@ -37,7 +37,7 @@ shinyUI(dashboardPage(
                    ),
                    conditionalPanel(
                      condition = "input.inputType == 'Server'",
-                     shinyFilesButton('sfile','Upload','Locate file',FALSE),
+                     shinyFilesButton('sfile','Browse','Locate file',FALSE),
                      h4(textOutput('path'))
                      #textInput("dir","Select file directory:",value=ifelse(exists("wd"),wd,"")), ##maybe a bad hack to set wd as getwd() during runQuest call
                      #checkboxInput("recursive", "Search directory recursively", FALSE),
@@ -66,12 +66,12 @@ shinyUI(dashboardPage(
              ),
              fluidRow(
                box(
-                 title = "Data Summary", width = 6, status = "primary",solidHeader=TRUE,
+                 title = "Data Summary", width = 6, status = "primary",solidHeader=TRUE,collapsible = T,collapsed = T,
                  uiOutput('summarycols'),
                  verbatimTextOutput('tablesum')
                ),
                box(
-                 title = "Column names", width = 6, status = "primary",solidHeader=TRUE,
+                 title = "Column names", width = 6, status = "primary",solidHeader=TRUE,collapsible = T,collapsed = T,
                  verbatimTextOutput('colnames')
                )
             )
@@ -281,10 +281,16 @@ shinyUI(dashboardPage(
    ), 
    fluidRow(
      box(
-       title="R Code",width = 12,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
-       HTML('<textarea id="add" rows="6" cols="150"></textarea>'),
+       title="R Code",width = 6,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
+       HTML('<textarea id="add" rows="6" cols="100"></textarea>'),
        helpText("See help tab for examples"),
        actionButton("execute","Apply code",icon=shiny::icon("arrow-circle-right"))
+    ),
+    box(title="Basic Filter",width=6,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
+        uiOutput('filterui'),
+        #checkboxInput('filterCheck',label = "Apply filter",value = F)
+        actionButton("filterButton","Apply filter",icon=shiny::icon("arrow-circle-right")),
+        actionButton("filterClear","Clear filter",icon=shiny::icon("arrow-circle-right"))
     )
    )
   )

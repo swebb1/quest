@@ -99,7 +99,7 @@ shinyServer(function(input, output,session) {
     values$numeric<-names(df[,sapply(df,is.numeric),drop=F])
     values$factor<-names(df[,sapply(df,is.factor),drop=F])
     values$items=names(df)
-    return<-df
+    return(df)
   })
   
   ##Create a file download button
@@ -393,7 +393,9 @@ shinyServer(function(input, output,session) {
          smooth = input$gg_smooth
        }
        if(input$gg_faceted){
-         facet = input$gg_facet
+         if(!is.null(input$gg_facet)){
+           facet = input$gg_facet
+         }
        }
        if(input$ggx != "NA"){
          x = input$ggx

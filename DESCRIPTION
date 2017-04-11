@@ -13,8 +13,11 @@ Imports:
   shinydashboard,
   shinyFiles,
   plotly,
+  d3heatmap,
   colorRamps,
+  corrplot
   ggplot2,
+  markdown,
   scales,
   munsell,
   ggthemes,
