@@ -352,7 +352,7 @@ if(!is.na(colour)){
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_colour_gradient(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
     }
     else{
       p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_colour_gradientn(colours=ml,trans=gradient.trans))
@@ -368,7 +368,7 @@ if(!is.na(fill)){
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_fill_gradient(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_fill_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
     }
     else{
       p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_fill_gradientn(colours=ml,trans=gradient.trans))

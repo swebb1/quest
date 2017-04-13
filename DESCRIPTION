@@ -15,7 +15,7 @@ Imports:
   plotly,
   d3heatmap,
   colorRamps,
-  corrplot
+  corrplot,
   ggplot2,
   markdown,
   scales,
