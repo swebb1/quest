@@ -16,6 +16,7 @@
 #' @param colour A variable to colour by
 #' @param fill A variable to fill by
 #' @param alpha A variable to alpha by
+#' @param text Variable to label points by
 #' @param man_colour Select a solid colour
 #' @param man_fill Select a solid fill colour
 #' @param man_alpha Select a static alpha value
@@ -50,7 +51,7 @@
 
 
 ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,facet_drop=T,facet_col=T,facet_row=T,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
-                         fill=NA,alpha=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
+                         fill=NA,alpha=NA,text=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
                          gradient="default",gradient.trans="identity",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
                          cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
@@ -91,6 +92,9 @@ if(geom=="point"){
   }
   if(!is.na(alpha)){
     a$alpha<-alpha
+  }
+  if(!is.na(text)){
+    a$text<-text
   }
   if(!is.na(man_colour)){
     g$colour<-man_colour

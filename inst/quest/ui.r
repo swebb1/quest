@@ -131,7 +131,8 @@ shinyUI(dashboardPage(
                  ),
                  conditionalPanel(condition = "input.gg_plotly==true",
                   plotlyOutput("ggplotly",height = "600px")
-                 )
+                 ),
+                 checkboxInput("gg_plotly","Activate Plotly")
                ),
                tabBox(
                  width = 4,
@@ -160,7 +161,6 @@ shinyUI(dashboardPage(
                  ),
                  tabPanel("Layout",
                           numericInput("gg_xrotate","Rotate X-axis labels",0),
-                          checkboxInput("gg_plotly","Activate Plotly"),
                           selectInput("gg_theme", "Plot theme:",c("grey","bw","dark","light","void","linedraw","minimal","classsic")),
                           checkboxInput("gg_manual","Set axes manually:",F),
                           conditionalPanel(
@@ -282,7 +282,7 @@ shinyUI(dashboardPage(
    fluidRow(
      box(
        title="R Code",width = 6,status="danger",collapsible=TRUE,collapsed = TRUE,solidHeader=TRUE,
-       HTML('<textarea id="add" rows="6" cols="100"></textarea>'),
+       HTML('<textarea id="add" rows="6" cols="75"></textarea>'),
        helpText("See help tab for examples"),
        actionButton("execute","Apply code",icon=shiny::icon("arrow-circle-right"))
     ),

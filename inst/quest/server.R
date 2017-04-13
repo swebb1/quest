@@ -274,7 +274,8 @@ shinyServer(function(input, output,session) {
      tagList(
           selectInput("gg_fill","Colour fill by:",c("NA",items)),
           selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
-          selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items))
+          selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items)),
+          selectInput("gg_text","Set labels for points:",c("NA",items))
       )
    })  
    
@@ -364,6 +365,7 @@ shinyServer(function(input, output,session) {
        fill=NA
        colour=NA
        alpha=NA
+       text=NA
        man_fill=NA
        man_colour=NA
        man_alpha=NA
@@ -379,6 +381,9 @@ shinyServer(function(input, output,session) {
        }
        if(input$gg_alpha != "NA"){
          alpha = input$gg_alpha
+       }
+       if(input$gg_text != "NA"){
+         text = input$gg_text
        }
        if(input$gg_man_fill != "NA"){
          man_fill = input$gg_man_fill
@@ -405,7 +410,7 @@ shinyServer(function(input, output,session) {
        }
        p<-ggplot_builder(d=fdf,x=x,y=y,logx=input$gg_logx,logy=input$gg_logy,facet=facet,facet_drop=input$gg_facet_drop,facet_row=input$gg_facet_row,facet_col=input$gg_facet_col,
                         geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
-                        fill=fill,alpha=alpha,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
+                        fill=fill,alpha=alpha,text=text,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.trans=input$gg_gradient.trans,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,
