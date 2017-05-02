@@ -49,7 +49,7 @@ shinyServer(function(input, output,session) {
   
   ##ui to select server file
   roots<-c(home= '~')
-  shinyFileChoose(input, 'sfile', roots=roots, session=session,filetypes=c('', 'txt','tab'))
+  shinyFileChoose(input, 'sfile', roots=roots, session=session,filetypes=c('', 'txt','tab','tsv','csv','xls','xlsx'))
   input_files <- reactive({
     id<-""
     if(!is.null(input$sfile)){
@@ -62,6 +62,7 @@ shinyServer(function(input, output,session) {
   
   ##Get data
   Data<-reactive({
+    sep<-switch(input$sep,tab="\t",space=" ",comma=",")
     if(input$inputType=="Upload"){
       if(is.null(input$file)){
         df<-test
@@ -71,7 +72,12 @@ shinyServer(function(input, output,session) {
         if(inFile == "" | is.null(inFile)){
           return(NULL)
         }
-        df<-read.table(inFile$datapath,header=input$header,fill=T)
+        if(input$xls){
+          df<-read.xls(inFile$datapath,header=input$header,fill=T)
+        }
+        else{
+          df<-read.table(inFile$datapath,header=input$header,fill=T,sep=sep)
+        }
       }
     }
     else if(input$inputType=="Server"){
@@ -79,7 +85,12 @@ shinyServer(function(input, output,session) {
       if(is.null(inFile)){
         return(NULL)
       }
-      df<-read.table(inFile,header=input$header,fill=T)
+      if(input$xls){
+        df<-read.xls(inFile,header=input$header,fill=T)
+      }
+      else{
+        df<-read.table(inFile,header=input$header,fill=T,sep=sep)
+      }
     }
     else if(input$inputType=="Environment"){
       if(is.data.frame(get(input$object))){
@@ -275,12 +286,13 @@ shinyServer(function(input, output,session) {
           selectInput("gg_fill","Colour fill by:",c("NA",items)),
           selectInput("gg_colour","Colour points and lines by:",c("NA",items)),
           selectInput("gg_alpha","Set transparency (alpha) by:",c("NA",items)),
-          selectInput("gg_text","Set labels for points:",c("NA",items))
+          selectInput("gg_text","Set text for plotly hover:",c("NA",items))
       )
    })  
    
    ##ggplot controls
    output$ggplot_controls <- renderUI({
+       items=values$items
        tagList(
          conditionalPanel(condition="input.gg_geom == 'histogram'",
               numericInput("gg_bins","Number of bins (0=default):",0),
@@ -297,7 +309,13 @@ shinyServer(function(input, output,session) {
          ),
          conditionalPanel(condition="input.gg_geom == 'point'",
               selectInput("gg_smooth","Add a smoothing line to points",c("NA","auto","gam","lm","glm","rlm","loess")),
-              checkboxInput("gg_smooth.se","Include standard error",T)
+              checkboxInput("gg_smooth.se","Include standard error",T),
+              selectInput("gg_labels","Label points",c("NA",items)),
+              conditionalPanel(condition="input.gg_labels != 'NA'",
+                numericInput("gg_nudge_x","Nudge labels on X-axis",0),
+                numericInput("gg_nudge_y","Nudge labels on Y-axis",0),
+                textInput("gg_label_display","Labels to display","")
+              )
          ),
          conditionalPanel(condition="input.gg_geom == 'line'"
          ),
@@ -371,6 +389,8 @@ shinyServer(function(input, output,session) {
        man_alpha=NA
        facet=NA
        smooth=NA
+       labels=NA
+       label_display=NA
        x=NA
        y=NA
        if(input$gg_fill != "NA"){
@@ -397,6 +417,12 @@ shinyServer(function(input, output,session) {
        if(input$gg_smooth != "NA"){
          smooth = input$gg_smooth
        }
+       if(input$gg_labels != "NA"){
+         labels = input$gg_labels
+       }
+       if(input$gg_label_display != ""){
+         label_display = eval(parse(text=paste0("subset(fdf,fdf$",input$gg_label_display,")[,input$gg_labels]")))
+       }
        if(input$gg_faceted){
          if(!is.null(input$gg_facet)){
            facet = input$gg_facet
@@ -410,7 +436,7 @@ shinyServer(function(input, output,session) {
        }
        p<-ggplot_builder(d=fdf,x=x,y=y,logx=input$gg_logx,logy=input$gg_logy,facet=facet,facet_drop=input$gg_facet_drop,facet_row=input$gg_facet_row,facet_col=input$gg_facet_col,
                         geom=input$gg_geom,smooth=smooth,smooth.se=input$gg_smooth.se,xrotate=input$gg_xrotate,colour=colour,
-                        fill=fill,alpha=alpha,text=text,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
+                        fill=fill,alpha=alpha,text=text,labels=labels,label_display=label_display,nudge_y=input$gg_nudge_y,nudge_x=input$gg_nudge_x,bar.position = input$gg_bar.position,binwidth=input$gg_binwidth,bins=input$gg_bins,stat.method=input$gg_stat_method,
                         stat.func=input$gg_stat.func,theme = input$gg_theme,coord_flip=input$gg_coord_flip,
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.trans=input$gg_gradient.trans,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,

@@ -49,7 +49,9 @@ shinyUI(dashboardPage(
                      condition = "input.inputType == 'Environment'",
                      uiOutput("inObjects")
                    ),
-                   checkboxInput("header", "File has column headers", TRUE)
+                   checkboxInput("header", "File has column headers", TRUE),
+                   selectInput("sep","Column delimiter",c("tab","space","comma")),
+                   checkboxInput("xls", "Excel file", FALSE)
                  ),
                  box(
                    title="Download table",width = 12,status="primary",solidHeader=TRUE,

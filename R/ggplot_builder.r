@@ -16,7 +16,11 @@
 #' @param colour A variable to colour by
 #' @param fill A variable to fill by
 #' @param alpha A variable to alpha by
-#' @param text Variable to label points by
+#' @param text Variable to show in plotly when hover over points
+#' @param labels Variable to label points by
+#' @param label_display vector of labels to display
+#' @param nudge_x shift label on x-axis
+#' @param nudge_y shift label on y-axis
 #' @param man_colour Select a solid colour
 #' @param man_fill Select a solid fill colour
 #' @param man_alpha Select a static alpha value
@@ -51,7 +55,7 @@
 
 
 ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,facet_drop=T,facet_col=T,facet_row=T,smooth=NA,smooth.se=T,xlim=NA,ylim=NA,xrotate=0,colour=NA,
-                         fill=NA,alpha=NA,text=NA,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
+                         fill=NA,alpha=NA,text=NA,labels=NA,label_display=NA,nudge_y=0,nudge_x=0,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
                          gradient="default",gradient.trans="identity",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
                          cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
@@ -340,6 +344,14 @@ if(logy & y!="1"){
 p<-switch(theme,grey=p+theme_grey(),dark=p+theme_dark(),light=p+theme_light(),linedraw=p+theme_linedraw(),bw=p+theme_bw(),minimal=p+theme_minimal(),classic=p+theme_classic(),void=p+theme_void(),p+theme_grey())
 if(xrotate!=0){
   p<-p+theme(axis.text.x=element_text(angle=xrotate,hjust=1,vjust=0.5))
+}
+
+if(!is.na(labels)){
+  if(is.na(label_display)){
+    label_display<-d[,labels]
+  }
+  labs=ifelse(d[,labels] %in% label_display,as.character(d[,labels]),'')
+  p<-p+geom_text(aes(label=labs),nudge_y=nudge_y,nudge_x=nudge_x)
 }
 
 ##set colour scales
