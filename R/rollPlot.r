@@ -32,13 +32,13 @@ rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
   tt<-t[,c(x,y)]
   l<-dim(tt)[1]
   ts<-tt[order(tt[,x]),]
-  tr<-as.data.frame(rollapply(ts,FUN=f,width=w,by=s,align="center"))
+  tr<-as.data.frame(rollapply(ts,FUN=f,width=w,by=s,align="center",na.rm=T))
   tr$idx<-row.names(tr)
   m<-melt(tr,id.vars=c(x,"idx"))
   m$variable<-factor(m$variable,levels=y)
   m$idx<-as.numeric(as.character(m$idx))
   if(f=="mean" & sd){
-    sr<-as.data.frame(rollapply(ts,FUN=sd,width=w,by=s,align="center"))
+    sr<-as.data.frame(rollapply(ts,FUN=sd,width=w,by=s,align="center",na.rm=T))
     sr$idx<-row.names(sr)
     ms<-melt(sr,id.vars=c(x,"idx"))
     ms$variable<-factor(ms$variable,levels=y)
