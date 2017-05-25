@@ -24,6 +24,7 @@ Imports:
   ggthemes,
   zoo,
   bigvis,
+  viridis,
   ggExtra
 Suggests:
     shiny

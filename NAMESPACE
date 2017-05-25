@@ -3,5 +3,6 @@
 export(bplot)
 export(factor_limit)
 export(ggplot_builder)
+export(rollPlot)
 export(runQuest)
 export(tiler)

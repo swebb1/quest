@@ -62,12 +62,14 @@ ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,facet_drop=T,facet_co
                          condense=F,condense.func="mean",condense.x=10,condense.y=10){
 library(plotly)
 library(colorRamps)
+library(viridis)
 library(ggplot2)
 library(bigvis)
 library(scales)
 library(munsell)
 library(ggthemes)
 library(ggExtra)
+library(RColorBrewer)
 
 ###Avoid plotting with large factors
 for(i in c(facet,colour,fill,x,alpha)){
@@ -83,8 +85,12 @@ if(is.na(y)){
   y<-"1"
 }  
 #color palettes
+vir<-viridis(gradient.steps)
+blues<-brewer.pal(n=9,"Blues")
+greens<-brewer.pal(n=9,"Greens")
 ml<-matlab.like2(gradient.steps)
 default<-mnsl(c("2.5PB 2/4", "2.5PB 7/10"))
+
 ###build plot
 a<-list()
 g<-list()
@@ -360,14 +366,24 @@ if(!is.na(colour)){
     p<-switch(colourset,default=p,Set1=p+scale_colour_brewer(palette="Set1"),
               Set2=p+scale_colour_brewer(palette="Set2"),
               Set3=p+scale_colour_brewer(palette="Set3"),
-              Spectral=p+scale_colour_brewer(palette="Spectral"))
+              Spectral=p+scale_colour_brewer(palette="Spectral"),
+              Viridis=p+scale_colour_viridis(discrete=T))
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),
+                Matlab=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans),
+                Blues=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=blues,trans=gradient.trans),
+                Greens=p+scale_colour_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=greens,trans=gradient.trans),
+                Viridis=p+scale_colour_viridis(space = "Lab",limits = gradient.range,oob = scales::squish,trans=gradient.trans)
+                )
     }
     else{
-      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_colour_gradientn(colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),
+                Matlab=p+scale_colour_gradientn(colours=ml,trans=gradient.trans),
+                Blues=p+scale_colour_gradientn(colours=blues,trans=gradient.trans),
+                Greens=p+scale_colour_gradientn(colours=greens,trans=gradient.trans),
+                Viridis=p+scale_colour_viridis(trans=gradient.trans))
     }
   }
 }
@@ -376,14 +392,25 @@ if(!is.na(fill)){
     p<-switch(colourset,default=p,Set1=p+scale_fill_brewer(palette="Set1"),
               Set2=p+scale_fill_brewer(palette="Set2"),
               Set3=p+scale_fill_brewer(palette="Set3"),
-              Spectral=p+scale_fill_brewer(palette="Spectral"))
+              Spectral=p+scale_fill_brewer(palette="Spectral"),
+              Viridis=p+scale_fill_viridis(discrete=T))
   }
   else{
     if(!is.na(gradient.range)){
-      p<-switch(gradient,default=p+scale_fill_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_fill_gradientn(colours=default,limits=gradient.range,oob = scales::squish,space="Lab",trans=gradient.trans),
+                Matlab=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=ml,trans=gradient.trans),
+                Blues=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=blues,trans=gradient.trans),
+                Greens=p+scale_fill_gradientn(space = "Lab",limits = gradient.range,oob = scales::squish,colours=greens,trans=gradient.trans),
+                Viridis=p+scale_fill_viridis(space = "Lab",limits = gradient.range,oob = scales::squish,trans=gradient.trans)
+                )
     }
     else{
-      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),Matlab=p+scale_fill_gradientn(colours=ml,trans=gradient.trans))
+      p<-switch(gradient,default=p+scale_colour_gradientn(colours=default,trans=gradient.trans),
+                Matlab=p+scale_fill_gradientn(colours=ml,trans=gradient.trans),
+                Blues=p+scale_fill_gradientn(colours=blues,trans=gradient.trans),
+                Greens=p+scale_fill_gradientn(colours=greens,trans=gradient.trans),
+                Viridis=p+scale_fill_viridis(trans=gradient.trans)
+                )
     }  }
 }
 if(coord_flip){

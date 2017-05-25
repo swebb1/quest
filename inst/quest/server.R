@@ -69,7 +69,7 @@ shinyServer(function(input, output,session) {
       }
       else{
         inFile<-input$file
-        if(inFile == "" | is.null(inFile)){
+        if(length(inFile) == 0){
           return(NULL)
         }
         if(input$xls){

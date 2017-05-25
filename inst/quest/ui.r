@@ -147,8 +147,8 @@ shinyUI(dashboardPage(
                           downloadButton('downloadggplot', 'Save plot as pdf')
                  ),
                  tabPanel("Colours",uiOutput("ggplot_colours"),
-                          selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral")),
-                          selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab")),
+                          selectInput("gg_colourset","Select colourset:",c("default","Set1","Set2","Set3","Spectral","Viridis")),
+                          selectInput("gg_gradient","Select colours for gradients:",c("default","Matlab","Blues","Greens","Viridis")),
                           selectInput("gg_gradient.trans","Transform gradient values:",c("identity","log","log2","log10","sqrt")),
                           numericInput("gg_gradient.steps","Number of steps in gradient",10),
                           checkboxInput("gg_grad_manual","Set gradient range manually:",F),

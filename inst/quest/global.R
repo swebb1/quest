@@ -14,6 +14,7 @@ library(colorRamps)
 library(scales)
 library(ggExtra)
 library(gdata)
+library(viridis)
 
 #set maximum file size
 options(shiny.maxRequestSize=500*1024^2) #500Mb

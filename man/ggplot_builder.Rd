@@ -7,7 +7,8 @@
 ggplot_builder(d, x = NA, y = NA, geom = "point", facet = NA,
   facet_drop = T, facet_col = T, facet_row = T, smooth = NA,
   smooth.se = T, xlim = NA, ylim = NA, xrotate = 0, colour = NA,
-  fill = NA, alpha = NA, bar.position = "stack", binwidth = 0,
+  fill = NA, alpha = NA, text = NA, labels = NA, label_display = NA,
+  nudge_y = 0, nudge_x = 0, bar.position = "stack", binwidth = 0,
   bins = 0, outliers = T, varwidth = F, enable.plotly = F,
   theme = "grey", logx = F, logy = F, man_colour = NA, man_fill = NA,
   man_alpha = NA, tile_height = NA, tile_width = NA,
@@ -45,6 +46,16 @@ ggplot_builder(d, x = NA, y = NA, geom = "point", facet = NA,
 \item{fill}{A variable to fill by}
 
 \item{alpha}{A variable to alpha by}
+
+\item{text}{Variable to show in plotly when hover over points}
+
+\item{labels}{Variable to label points by}
+
+\item{label_display}{vector of labels to display}
+
+\item{nudge_y}{shift label on y-axis}
+
+\item{nudge_x}{shift label on x-axis}
 
 \item{bar.position}{Position of bars in a bar plot (stack,dodge,fill)}
 
