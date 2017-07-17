@@ -6,7 +6,8 @@
 \usage{
 rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
   scale = "linear", feature = "data points", data = F,
-  samples = "Samples", split = F, sd = F, cols = vector(), facet = NA)
+  samples = "Samples", split = F, sd = F, cols = vector(), facet = NA,
+  splitscale = "fixed")
 }
 \arguments{
 \item{t}{Table of data.}
@@ -38,6 +39,8 @@ rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
 \item{sd}{Plot standard deviation as ribbon when plotting mean.}
 
 \item{facet}{Variable to facet by.}
+
+\item{splitscale}{Scales for split plots "fixed"(default),"free",free_x","free_y".}
 }
 \description{
 This function orders and bins a variable in to groups defined by a window 

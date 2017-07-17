@@ -15,6 +15,7 @@
 #' @param data Returns a table in long form if set to True.
 #' @param samples Set the legend name. Defaults to "Samples".
 #' @param split Plot samples separately.
+#' @param splitscale Scales for split plots "fixed"(default),"free",free_x","free_y".
 #' @param facet Variable to facet by.
 #' @param sd Plot standard deviation as ribbon when plotting mean.
 #' @keywords bin average plots.
@@ -24,7 +25,7 @@
 
 
 rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
-                   scale="linear",feature="data points",data=F,samples="Samples",split=F,sd=F,cols=vector(),facet=NA){
+                   scale="linear",feature="data points",data=F,samples="Samples",split=F,sd=F,cols=vector(),facet=NA,splitscale="fixed"){
   
   library(zoo) #for rollapply function
   library(ggplot2)
@@ -97,7 +98,7 @@ rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
     p<-p+scale_color_manual(values = cols)
   }
   if(split){
-    p<-p+facet_wrap(~variable)
+    p<-p+facet_wrap(~variable,scales = splitscale)
   }
 p
 }
