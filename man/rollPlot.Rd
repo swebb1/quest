@@ -6,7 +6,7 @@
 \usage{
 rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
   scale = "linear", feature = "data points", data = F,
-  samples = "Samples", facet = F, sd = F)
+  samples = "Samples", split = F, sd = F, cols = vector(), facet = NA)
 }
 \arguments{
 \item{t}{Table of data.}
@@ -32,6 +32,12 @@ rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
 \item{data}{Returns a table in long form if set to True.}
 
 \item{samples}{Set the legend name. Defaults to "Samples".}
+
+\item{split}{Plot samples separately.}
+
+\item{sd}{Plot standard deviation as ribbon when plotting mean.}
+
+\item{facet}{Variable to facet by.}
 }
 \description{
 This function orders and bins a variable in to groups defined by a window 
