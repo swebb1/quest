@@ -18,6 +18,7 @@
 #' @param splitscale Scales for split plots "fixed"(default),"free",free_x","free_y".
 #' @param facet Variable to facet by.
 #' @param sd Plot standard deviation as ribbon when plotting mean.
+#' @param points Plot points at each data position
 #' @keywords bin average plots.
 #' @export
 #' @examples
@@ -25,7 +26,9 @@
 
 
 rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
-                   scale="linear",feature="data points",data=F,samples="Samples",split=F,sd=F,cols=vector(),facet=NA,splitscale="fixed"){
+                   scale="linear",feature="data points",data=F,
+                   samples="Samples",split=F,sd=F,cols=vector(),
+                   facet=NA,splitscale="fixed",points=F){
   
   library(zoo) #for rollapply function
   library(ggplot2)
@@ -67,7 +70,13 @@ rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
         p<-p+scale_fill_manual(values = cols)
       }
     }
-    p<-p+geom_line(size=2)+ggtitle(paste(l,feature))+theme_bw()
+    if(points){
+      p<-p+geom_point(size=2)
+    }
+    else{
+      p<-p+geom_line(size=2)
+    }
+    p<-p+ggtitle(paste(l,feature))+theme_bw()
     if(scale=="log"){
       p<-p+scale_x_log10()
     }
@@ -86,7 +95,13 @@ rollPlot<-function(t,x,y,ylab="",xlab="",w=400,s=80,f="mean",
         p<-p+scale_fill_manual(values = cols)
       }
     }
-    p<-p+geom_line(size=2)+ggtitle(paste(l,feature))+theme_bw()
+    if(points){
+      p<-p+geom_point(size=2)
+    }
+    else{
+      p<-p+geom_line(size=2)
+    }
+    p<-p+ggtitle(paste(l,feature))+theme_bw()
   }
   if(ylab!=""){
     p<-p+ylab(ylab)
