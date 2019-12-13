@@ -7,16 +7,16 @@
 ggplot_builder(d, x = NA, y = NA, geom = "point", facet = NA,
   facet_drop = T, facet_col = T, facet_row = T, smooth = NA,
   smooth.se = T, xlim = NA, ylim = NA, xrotate = 0, colour = NA,
-  fill = NA, alpha = NA, text = NA, labels = NA, label_display = NA,
-  nudge_y = 0, nudge_x = 0, bar.position = "stack", binwidth = 0,
-  bins = 0, outliers = T, varwidth = F, enable.plotly = F,
-  theme = "grey", logx = F, logy = F, man_colour = NA, man_fill = NA,
-  man_alpha = NA, tile_height = NA, tile_width = NA,
-  gradient = "default", gradient.trans = "identity", gradient.steps = 10,
+  fill = NA, alpha = NA, text = NA, labels = NA,
+  label_display = NA, nudge_y = 0, nudge_x = 0,
+  bar.position = "stack", binwidth = 0, bins = 0, outliers = T,
+  varwidth = F, enable.plotly = F, theme = "grey", logx = F,
+  logy = F, man_colour = NA, man_fill = NA, man_alpha = NA,
+  tile_height = NA, tile_width = NA, gradient = "default",
+  gradient.trans = "identity", gradient.steps = 10,
   gradient.range = NA, colourset = "default", coord_flip = F,
   cut_method = "number", cut.n = 10, factorlim = 50,
-  stat.method = "count", stat.func = "mean", condense = F,
-  condense.func = "mean", condense.x = 10, condense.y = 10)
+  stat.method = "count", stat.func = "mean")
 }
 \arguments{
 \item{d}{Table of data}
@@ -104,14 +104,6 @@ ggplot_builder(d, x = NA, y = NA, geom = "point", facet = NA,
 \item{stat.method}{Set stat method for barplots (count,identity,summary) (default=bin)}
 
 \item{stat.func}{Set summary function for stat.method="summary" (default=mean)}
-
-\item{condense}{Use bigvis package to summarise overlapping points in large datasets}
-
-\item{condense.func}{Function used to condense (mean,median,sum,count)}
-
-\item{condense.x}{Size of bin to use on X axis to find overlapping points}
-
-\item{condense.y}{Size of bin to use on Y axis to find overlapping points}
 }
 \description{
 This function builds a ggplot2 function to plot data

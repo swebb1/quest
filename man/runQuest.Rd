@@ -2,16 +2,20 @@
 % Please edit documentation in R/runQuest.r
 \name{runQuest}
 \alias{runQuest}
-\title{Run quest app function}
+\title{runQuest function}
 \usage{
 runQuest()
 }
+\arguments{
+\item{t}{Table of data}
+
+\item{c}{Selected column to test}
+
+\item{lim}{Limit to number of levels}
+}
 \description{
-Run quest app function
+This function builds a ggplot2 function to plot data
 }
-\examples{
-This function runs the quest application.
-quest()
-}
-\keyword{quest}
-\keyword{shiny}
+\keyword{factor}
+\keyword{limits}
+\keyword{runQuest()}

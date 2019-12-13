@@ -4,9 +4,10 @@
 \alias{bplot}
 \title{bplot rolling average plotting function}
 \usage{
-bplot(t, x, y, ys = 1, ystep = 0, ylab = "", axis3 = "NA", w = 400,
-  s = 80, f = "mean", scale = "linear", leg = "topleft", col = 1:100,
-  max = "default", min = "default", feature = "data points")
+bplot(t, x, y, ys = 1, ystep = 0, ylab = "", axis3 = "NA",
+  w = 400, s = 80, f = "mean", scale = "linear", leg = "topleft",
+  col = 1:100, max = "default", min = "default",
+  feature = "data points")
 }
 \arguments{
 \item{t}{Table of data.}

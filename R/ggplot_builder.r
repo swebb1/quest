@@ -44,10 +44,6 @@
 #' @param coord_flip Flip the x and y axes (default=F)
 #' @param tile_height Set height of tile for geom_tile
 #' @param tile_width Set width of tile for geom_tile
-#' @param condense Use bigvis package to summarise overlapping points in large datasets
-#' @param condense.func Function used to condense (mean,median,sum,count)
-#' @param condense.x Size of bin to use on X axis to find overlapping points
-#' @param condense.y Size of bin to use on Y axis to find overlapping points
 #' @keywords ggplot wrapper builder
 #' @export
 #' @examples
@@ -58,13 +54,11 @@ ggplot_builder<-function(d,x=NA,y=NA,geom="point",facet=NA,facet_drop=T,facet_co
                          fill=NA,alpha=NA,text=NA,labels=NA,label_display=NA,nudge_y=0,nudge_x=0,bar.position="stack",binwidth=0,bins=0,outliers=T,varwidth=F,enable.plotly=F,
                          theme="grey",logx=F,logy=F,man_colour=NA,man_fill=NA,man_alpha=NA,tile_height=NA,tile_width=NA,
                          gradient="default",gradient.trans="identity",gradient.steps=10,gradient.range=NA,colourset="default",coord_flip=F,
-                         cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean",
-                         condense=F,condense.func="mean",condense.x=10,condense.y=10){
+                         cut_method="number",cut.n=10,factorlim=50,stat.method="count",stat.func="mean"){
 library(plotly)
 library(colorRamps)
 library(viridis)
 library(ggplot2)
-library(bigvis)
 library(scales)
 library(munsell)
 library(ggthemes)
@@ -138,21 +132,6 @@ if(geom=="tile"){
   }
   as<-do.call(aes_string,a)
   geo<-do.call(geom_tile,g)
-  ##BigVis data
-  if(condense){
-    if(!is.na(fill)){
-      tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y),z = d[,fill],summary = condense.func)
-    }
-    else{
-      tab<-condense(x=bin(d[,x],condense.x),y=bin(d[,y],condense.y))
-    }
-    if(condense.func=="mean"){
-      tab<-tab[,-3]
-    }
-    names(tab)<-c(x,y,fill)
-    #if(func=="count" & gradient.log){tab[,paste0(fill,".",tile_bin.func)]<-log(tab[,paste0(fill,".",tile_bin.func)])}
-    d<-tab
-  }
 }
 if(geom=="line"){
   a$x<-x

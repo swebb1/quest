@@ -143,6 +143,3 @@ bplot<-function(t,x,y,ys=1,ystep=0,ylab="",axis3="NA",w=400,s=80,f="mean",
       legend(x=leg,legend=c(y),lty=1,lwd=2,col=c(col),box.lwd=0,bty="n")}
   }
 }
-
-
-

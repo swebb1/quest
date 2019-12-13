@@ -4,10 +4,10 @@
 \alias{rollPlot}
 \title{rollPlot rolling plotting function}
 \usage{
-rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
-  scale = "linear", feature = "data points", data = F,
-  samples = "Samples", split = F, sd = F, cols = vector(), facet = NA,
-  splitscale = "fixed", points = F)
+rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80,
+  f = "mean", scale = "linear", feature = "data points", data = F,
+  samples = "Samples", split = F, sd = F, cols = vector(),
+  facet = NA, splitscale = "fixed", points = F, labels = vector())
 }
 \arguments{
 \item{t}{Table of data.}
@@ -43,6 +43,8 @@ rollPlot(t, x, y, ylab = "", xlab = "", w = 400, s = 80, f = "mean",
 \item{splitscale}{Scales for split plots "fixed"(default),"free",free_x","free_y".}
 
 \item{points}{Plot points at each data position}
+
+\item{labels}{Set the labels for samples.}
 }
 \description{
 This function orders and bins a variable in to groups defined by a window 

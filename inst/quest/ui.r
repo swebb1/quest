@@ -14,7 +14,6 @@ shinyUI(dashboardPage(
         menuItem("2D plots",tabName="2d",icon=shiny::icon("line-chart")),
         menuItem("ggplot wrapper",tabName="gg",icon=shiny::icon("line-chart")),
         menuItem("Binned plots",tabName="bin",icon=shiny::icon("line-chart")),
-        menuItem("3D tile plots",tabName="3d",icon=shiny::icon("line-chart")),
         menuItem("Heatmaps",tabName="heatmap",icon=shiny::icon("th")),
         menuItem("Settings",tabName="settings",icon=shiny::icon("cogs")),
         menuItem("Help",tabName="help",icon=shiny::icon("question")),
@@ -205,44 +204,6 @@ shinyUI(dashboardPage(
                  )
                  )
                  )
-             )
-     ),
-     tabItem(tabName="3d",
-             fluidRow(
-               box(
-                   title="3D tile plot",width = 8,status="primary",solidHeader=TRUE,
-                   plotOutput("tplot",height = "600px")
-               ),
-               box(
-                 title="Data",width = 4,status="success",solidHeader=TRUE,
-                 wellPanel(p(strong("Data")),style = 'overflow-y: scroll; max-height: 300px',
-                  uiOutput("t_cols")
-                 )
-               )
-             ),
-             fluidRow(
-               box(
-                 title="Controls",width = 12,status="success",solidHeader=TRUE,
-                 wellPanel(p(strong("Controls")),style = 'overflow-y: scroll; max-height: 400px',
-                           numericInput("bins","Bins",1,min=1,max=1000),
-                           selectInput("tsummary","Operation",choices=c("mean","median","sum","count")),                                   
-                           checkboxInput("tzman","Manually alter colour scale",F),
-                           conditionalPanel("input.tzman == true",
-                             numericInput("tzmin","Minimum colour scale",0),
-                             numericInput("tzmax","Maximum colour scale",0)
-                           ),
-                           checkboxInput("txman","Manually alter X scale",F),
-                           conditionalPanel("input.txman == true",
-                             numericInput("txmin","Minimum x-axis value",0),
-                             numericInput("txmax","Maximum x-axis value",0)
-                           ),
-                           checkboxInput("tyman","Manually alter Y scale",F),
-                           conditionalPanel("input.tyman == true",                                                    
-                            numericInput("tymin","Minimum y-axis value",0),
-                            numericInput("tymax","Maximum y-axis value",0)
-                           )
-                 )
-               )
              )
      ),
      tabItem(tabName="heatmap",

@@ -133,7 +133,7 @@ shinyServer(function(input, output,session) {
   output$table = renderDataTable({
     fdf<-Data()
     return(fdf)
-  },options = list(bSortClasses = TRUE,aLengthMenu = c(5,10,20,50,100), iDisplayLength = 5)
+  },options = list(orderClasses = TRUE,lengthMenu = c(5,10,20,50,100), pageLength = 5)
   )
   
   output$summarycols = renderUI({
@@ -332,12 +332,6 @@ shinyServer(function(input, output,session) {
                           helpText("number = n groups with approx. equal observations, interval = n groups of equal range, width = groups of width n")
          ),
          conditionalPanel(condition="input.gg_geom == 'tile'",
-              checkboxInput("gg_condense","Summarise overlaps",F),
-              conditionalPanel(condition = "input.gg_condense == true",
-                          selectInput("gg_condense_func", "Summary function",c("mean","median","sum","count")),
-                          numericInput("gg_condense.x","Size of X bin",10),
-                          numericInput("gg_condense.y","Size of Y bin",10)
-              ),
               checkboxInput("gg_tile_manual","Set tile dimensions manually:",F),
               conditionalPanel(
               condition = "input.gg_tile_manual == true",
@@ -441,7 +435,7 @@ shinyServer(function(input, output,session) {
                         enable.plotly = input$gg_plotly,outliers=input$gg_outliers,varwidth=input$gg_varwidth,colourset=input$gg_colourset,
                         gradient=input$gg_gradient,gradient.trans=input$gg_gradient.trans,gradient.steps=input$gg_gradient.steps,xlim=xlim,ylim=ylim,man_colour=man_colour,man_fill=man_fill,man_alpha=man_alpha,
                         cut_method=input$gg_cut_method,cut.n=input$gg_cut.n,factorlim=input$factorlim,tile_width=tile_width,tile_height=tile_height,
-                        gradient.range=zlim,condense=input$gg_condense,condense.x = input$gg_condense.x,condense.y = input$gg_condense.y,condense.func = input$gg_condense_func)
+                        gradient.range=zlim)
        return(p)
      }  
    })
@@ -486,54 +480,7 @@ shinyServer(function(input, output,session) {
               ,f=input$bf,scale=input$bscale,leg=input$bleg,col=cols,max=bmax,min=bmin,feature=input$bfeature)
     }  
   })
-  
-  ##tile controls
-  output$t_cols <- renderUI({
-    isolate({
-      if(is.null(Data())){return(NULL)}
-    })
-    items=values$numeric #get numeric columns only
-    tagList(
-        selectInput("tx", "X-axis",items), 
-        numericInput("txs","Scale",1), ##Allows rescaling of value as tile plots auto round to integers
-        checkboxInput("tlogx","Log",value = F),
-        selectInput("ty", "Y-axis",items),
-        numericInput("tys","Scale",1),
-        checkboxInput("tlogy","Log",value = F),
-        selectInput("tz", "Colour by",items),
-        numericInput("tzs","Scale",1),
-        checkboxInput("tlogz","Log",value = F)
-        )
-  })
-  
-  ##tile plots
-  output$tplot <- renderPlot({ 
-    if(is.null(Data())){return(NULL)}
-    if(length(input$tx)==0 | length(input$ty)==0 | length(input$tz)==0){
-      return(NULL)
-    }
-    fdf<-Data()
-    #fdf<-filter(input$filts)
-    txrange=NA
-    tyrange=NA
-    tzrange=NA
-    if(input$txman){
-      txrange=c(input$txmin,input$txmax)
-    }
-    if(input$tyman){
-      tyrange=c(input$tymin,input$tymax)
-    }
-    if(input$tzman){
-      tzrange=c(input$tzmin,input$tzmax)
-    }
-    if(input$auto){
-      tiler(t=fdf,x=input$tx,xl=input$tlogx,xs=input$txs,y=input$ty,yl=input$tlogy,ys=input$tys,
-            z=input$tz,zl=input$tlogz,zs=input$tzs,bin=input$bins,zrange=tzrange,
-            xrange=txrange,yrange=tyrange,
-            func=input$tsummary)  
-    }  
-  })
-  
+
   ##heatmap
   ##plot controls
   output$h_cols <- renderUI({
